@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{data_tables_css.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <script  th:src="@{data_tables_jquery.js}"></script>
+    <script  th:src="@{data_tables_js.js}"></script>
+    <link rel="stylesheet" th:href="@{teachers.css}">
+    <title>STAFFS</title>
+    <script>
+        $(document).ready(function () {
+                $('#teachers_data').DataTable();
+            });
+    </script>
+    <title>Document</title>
+</head>
+<body>
+    <div id="main-content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><h3 style="color: white;">TEACHERS</h3></li>
+                <li><a th:href="@{/admin}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div style="text-align: center; margin-top: 15px;">
+            <a th:href="@{/add_staff}" class="btn btn-primary btn-lg">Add Teacher</a>
+        </div>
+        <div style="align-self: center;">
+            <table class="display" id="teachers_data" border="1" style="width: 100%;">
+                <thead style="text-align: center;">
+                    <tr>
+                        <th>FULL NAME</th>
+                        <th>TEACHER'S ID</th>
+                        <th>DEPARTMENT</th>
+                        <th>CLASS TEACHER</th>
+                        <th>VIEW</th>
+                        <th>EDIT</th>
+                        <th>DELETE</th>
+                    </tr>
+                </thead>
+                <tbody style="text-align: center;">
+                    <tr th:each="tch : ${staffs}">
+                        <td th:text="${tch.getFullName()}"></td>
+                        <td th:text="${tch.getTeacher_id()}"></td>
+                        <td th:text="${tch.getDepartment_Id().getDepartment_name()}"></td>
+                        <th:block th:switch="${tch.getClass_teacher()}">
+                            <td th:case="${null}" th:text="'NO CLASS'"></td>
+                            <td th:case="*" th:text="${tch.getClass_teacher().getClass_name()}"></td>
+                        </th:block>
+                        <td><a th:href="@{/view_staff_profile(staff=${tch.getTeacher_id()})}" class="btn btn-primary">View</a></td>
+                        <td><a th:href="@{/edit_staff_profile(staff=${tch.getTeacher_id()})}" class="btn btn-success">Edit</a></td>
+                        <td><a th:href="@{/delete_staff_verification(staff=${tch.getTeacher_id()})}" class="btn btn-danger">Delete</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

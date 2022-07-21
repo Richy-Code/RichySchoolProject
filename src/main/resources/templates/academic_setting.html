@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <script  th:src="@{data_tables_jquery.js}"></script>
+    <script  th:src="@{data_tables_js.js}"></script>
+    <link rel="stylesheet" th:href="@{academic_setting.css}">
+    <link rel="stylesheet" th:href="@{data_tables_css.css}">
+    <script>
+        $(document).ready(function () {
+                $('#academic_settings_data').DataTable();
+            });
+    </script>
+    <title>ACADEMIC SETTING</title>
+</head>
+<body>
+    <div id="main-content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><h3 style="color: white;">ACADEMIC SETTING</h3></li>
+                <li><a th:href="@{/admin}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div style="display: flex; justify-content: center; height: 60px; background-color: rgba(194, 194, 194,0.3); border-bottom: solid 1px rgb(194, 194, 194); width: 100%;">
+            <h3 style="color: rgb(117, 117, 117); padding-left: 10px; margin-top: 10px;">ACADEMIC SETTING</h3>
+        </div>
+        <div id="sub-main">
+            <div id="calendar_details">
+                <div style="height: 50px; border-bottom: solid 1px rgb(194, 194, 194);">
+                    <h4 style="padding: 10px;">Add Academic Calendar Details</h4>
+                </div>
+                <div style="background-color: white; height: 80px;">
+                    <p style=" padding-left: 15px; padding-top: 15px;">All Fields Required</p>
+                    <hr style="width: 90%; padding-left: 15px;">
+                </div>
+                <div style="background-color: white; padding-bottom: 10px; height: 100%; 
+                display: flex; flex-direction: column; justify-content: space-around; padding-right: 25px;">
+                    <form action="/save_academic_setting" th:object="${termInfo}">
+                        <table>
+                            <tr>
+                                <td style="text-align: right;">Academic Year</td>
+                                    <td style="display: flex; padding-left: 10px;">
+                                        <input type="number" name="first_yrs" th:value="${year.getFirst_year()}" min="2022" class="form-control" required>
+                                        <h3 style="padding-left: 10px; padding-right: 10px;">/</h3>
+                                        <input type="number" name="last_yrs" th:value="${year.getLast_year()}" min="2022" class="form-control" style="padding-right: 10px;" required>
+                                    </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: right;">Term</td>
+                                <td style="padding-left: 10px;">
+                                    <select name="trm" id="term" class="form-select" required>
+                                        <option value="1">FIRST</option>
+                                        <option value="2">SECOND</option>
+                                        <option value="3">THIRD</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: right;">Term Begins</td>
+                                <td style="padding-left: 10px;"><input type="date" class="form-control" required th:field="*{open_date}"></td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: right;">Term Ends</td>
+                                <td style="padding-left: 10px;"><input type="date" class="form-control" required th:field="*{closing_date}"></td>
+                            </tr>
+                        </table>
+                        <div style="text-align: center; margin-top: 20px;">
+                            <input type="submit" value="Save" class="btn btn-success">
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="current_calendar_details">
+                <div style="height: 50px; border-bottom: solid 1px rgb(194, 194, 194);">
+                    <h4 style="padding: 10px;">Current Academic Calendar</h4>
+                </div>
+                <div style="background-color: white; padding: 10px; height: 100%;">
+                    <table class="display" id="academic_settings_data" border="1px">
+                        <thead style="text-align: center;">
+                            <tr>
+                                <th>ACADEMIC YEAR</th>
+                                <th>TERM</th>
+                                <th>TERM BEGINS</th>
+                                <th>TERM ENDS</th>
+                            </tr>
+                        </thead>
+                        <tbody style="text-align: center;">
+                            <tr th:each="term : ${infoList}">
+                                <td th:text="${term.getAcademic_year().getFirst_year() + '/' + term.getAcademic_year().getLast_year()}"></td>
+                                <td th:text="${term.getTerm().getTerm_name()}"></td>
+                                <td th:text="${term.getOpen_date()}"></td>
+                                <td th:text="${term.getClosing_date()}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

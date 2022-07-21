@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <link rel="stylesheet" th:href="@{teachers_to_class.css}">
+    <title>ADD CLASSES AND SUBJECTS</title>
+</head>
+<body>
+    <div id="main-content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><h3 style="color: white;">ADD CLASS</h3></li>
+                <li><a th:href="@{/admin}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div style="align-self: center;">
+            <form action="/save_classes_subject" th:object="${staff}">
+                <input type="hidden" th:value="${staff.getTeacher_id()}" th:field="*{teacher_id}">
+                <input type="hidden" th:value="${edited}" name="edited">
+                <div style="display: flex; justify-content:space-between;">
+                    <div style="margin-left: 20px;">
+                        <div>
+                            <h1 class="lab">ASSIGN SUBJECTS<!--teacher name--></h1>
+                        </div>
+                        <table class="table table-bordered" style="width: fit-content; margin-left: 20px;">
+                            <thead>
+                                <tr style="text-align: center;">
+                                    <th scope="col">SUBJECTS</th>
+                                    <th scope="col">ASSIGN SUBJECT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="sub, item: ${subjects}">
+                                    <td th:text="${sub.getSubject_name()}"></td>
+                                    <td class="cent"><input type="checkbox" class="form-check-input" th:value="${sub.getSubject_id().toString()}"
+                                                            th:field="*{teacherSubjects[__${item.index}__]}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-left: 20px;">
+                        <div>
+                            <h1 class="lab">ASSIGN CLASSES<!--teacher name--></h1>
+                        </div>
+                        <table class="table table-bordered" style="width: fit-content; margin-left: 20px;">
+                            <thead>
+                                <tr style="text-align: center;">
+                                    <th scope="col">CLASSES</th>
+                                    <th scope="col">ASSIGN CLASS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="cls,item : ${classes}">
+                                    <td th:text="${cls.getClass_name()}"></td>
+                                    <td class="cent"><input type="checkbox" class="form-check-input" th:field="*{teacherClasses[__${item.index}__]}"
+                                                            th:value="${cls.getClass_id().toString()}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content:center;"><input type="submit" value="SAVE" class="btn btn-primary btn-lg"></div>
+            </form>
+        </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>
