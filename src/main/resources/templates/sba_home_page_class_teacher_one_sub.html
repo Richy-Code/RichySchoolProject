@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" th:href="@{exams_home_page.css}">
+  <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+  <title>ASSESSMENT</title>
+</head>
+<body>
+<div id="main-content">
+  <div id="nav-bar">
+    <ul id="nav-link">
+      <li><a th:href="@{/teacher_home_page}">HOME</a></li>
+      <li><a th:href="@{/report_filling_form}">FILL REPORT</a></li>
+      <li><a th:href="@{/logout}">LOGOUT</a></li>
+    </ul>
+  </div>
+  <div id="section-two">
+    <div style="text-align: center; width: auto;">
+      <form action="/sba_page">
+        <input type="hidden" th:value="${subjects.get(0).getSubject_id()}" name="sub">
+        <table>
+          <tbody>
+          <tr>
+            <td class="right">CLASS</td>
+            <td class="left">
+              <select name="cls" id="cls" class="form-select" required>
+                <option th:each="class : ${classes}" th:value="${class.getClass_id()}"
+                        th:text="${class.getClass_name()}"
+                ></option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="right" style="padding-top: 20px;">TERM</td>
+            <td class="left" style="padding-top: 20px;">
+              <select name="trm" id="trm" class="form-select" required>
+                <option value = 1>TERM ONE</option>
+                <option value = 2>TERM TWO</option>
+                <option value = 3>TERM THREE</option>
+              </select>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+        <input type="submit" value="GO" class="btn btn-primary btn-lg" style="margin-top: 30px;">
+      </form>
+    </div>
+  </div>
+</div>
+<script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{exams_home_page.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>FILL_REPORT</title>
+</head>
+<body>
+<div id="main-content">
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><a th:href="@{/teacher_home_page}">HOME</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    <div id="section-two">
+        <div style="text-align: center; width: auto;">
+            <form action="/report_filling">
+                <input type="hidden" name="cls" th:value="${class_id}">
+                <table>
+                    <tbody>
+                    <tr>
+                        <td class="right" style="padding-top: 20px;">TERM</td>
+                        <td class="left" style="padding-top: 20px;">
+                            <select name="trm" id="term" class="form-select" required>
+                                <option value = 1>TERM ONE</option>
+                                <option value = 2>TERM TWO</option>
+                                <option value = 3>TERM THREE</option>
+                            </select>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <input type="submit" value="GO" class="btn btn-primary btn-lg" style="margin-top: 30px;">
+            </form>
+        </div>
+    </div>
+</div>
+<script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

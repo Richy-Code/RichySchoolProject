@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <link rel="stylesheet" th:href="@{teachers.css}">
+    <title>UNCOMPLETED ENTRY</title>
+</head>
+<body>
+    <div id="main-content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><h3 style="color: white;">UNCOMPLETED ENTRY</h3></li>
+                <li><a th:href="@{/admin}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div style="margin-top: 10px;">
+            <h4 style="font-weight: bold; text-decoration:underline; text-align:center">UNCOMPLETED ENTRY FOR THE DISPLAYED CLASSES</h4>
+        </div>
+        <div style="align-self: center; margin-top: 10px;">
+            <table class="table table-striped"  border="1" style="width: 100%;">
+                <thead style="text-align: center;">
+                    <tr>
+                        <th>CLASS NAME</th>
+                        <th>DEPARTMENT</th>
+                        <th>CLASS TEACHER</th>
+                    </tr>
+                </thead>
+                <tbody style="text-align: center;">
+                    <tr th:each="clss : ${cls}">
+                        <td th:text="${clss.getClass_name()}"></td>
+                        <td th:text="${clss.getParentClass().getClass_department().getDepartment_name()}"></td>
+                        <td th:text="${clss.getClass_teacher_id().getFullName()}"></td>
+                    </tr>
+            </table>
+        </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

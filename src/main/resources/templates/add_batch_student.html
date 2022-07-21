@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{text_file_format.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>Document</title>
+</head>
+<body>
+    <div id="main-content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><h3 style="color: white;">ADD STUDENTS</h3></li>
+                <li><a th:href="@{/admin}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div id="second-section">
+            <div style="margin-top: 20px; text-align: center; font-weight: bold;">
+                <h1>FILE FORMAT</h1>
+                <div style="height: fit-content; width: fit-content; background-color: #121212; text-align: center;margin: 20px;">
+                    <img src="fmat2.PNG" alt="file format" style="padding: 20px 20px 20px 20px;">
+                </div>
+            </div>
+            <div style="text-align: center; width: fit-content; margin-top: 20px;">
+                <h1 style="font-weight: bold;">NEW STUDENTS</h1>
+                <form action="" style="margin-top: 20px;" enctype="multipart/form-data"> 
+                    <div style="display: flex;">
+                        <div>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td class="right">CLASS</td>
+                                        <td class="left">
+                                            <select name="cls"  class="form-select" required>
+                                                <option th:each="clss : ${cls}" th:value="${clss.getClass_id()}"
+                                                 th:text="${clss.getClass_name()}"></option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="right">UPLOAD TEXT FILE</td>
+                                        <td class="left" style="padding-top: 20px;">
+                                            <input type="file" class="form-control" accept=".txt" name="file">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                     <input type="submit" value="SUBMIT" class="btn btn-primary btn-lg" style="margin-top: 20px;">
+                </form>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

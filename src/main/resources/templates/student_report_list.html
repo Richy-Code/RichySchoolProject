@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{student_report_list.css}">
+    <link rel="stylesheet" th:href="@{data_tables_css.css}">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <script  th:src="@{data_tables_jquery.js}"></script>
+    <script  th:src="@{data_tables_js.js}"></script>
+    <title>Document</title>
+    <script>
+        $(document).ready(function () {
+            $('#student_data').DataTable();
+        });
+    </script>
+</head>
+<body>
+<div id="nav-bar">
+    <ul id="nav-link">
+        <li><a th:href="@{/teacher_home_page}">HOME</a></li>
+        <li><a th:href="@{/logout}">LOGOUT</a></li>
+    </ul>
+</div>
+<div id="section-two">
+    <div><h1 th:value="${class.getClass_name()}"></h1></div>
+</div>
+<div id="tbl">
+    <table id="student_data" class="display" style="width: 100%;" border="1">
+        <thead>
+        <tr>
+            <th>FULL NAME</th>
+            <th>STUDENT ID</th>
+            <th>VIEW REPORT</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="students : ${classStudents}">
+            <td th:text="${students.getFullName()}"></td>
+            <td th:text="${students.getStudent_id()}"></td>
+            <td><a th:href="@{/passed_record/{student_id}(student_id=${students.getStudent_id()})}" class="btn btn-primary">View</a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

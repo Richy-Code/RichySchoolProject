@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{view_student_profile.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>CONFIGURATION PROFILE</title>
+</head>
+<body>
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><h3 style="color: white;">SBA CONFIGURATION PROFILE</h3></li>
+            <li><a th:href="@{/admin}">HOME</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    <div id="student-details">
+        <div id="stu-details">
+            <h3 style="color: rgb(144, 146, 147);">CONFIGURATION DETAILS</h3>
+        </div>
+       <div id="sec-two">
+            <div id="img">
+                <div style="background-color: rgb(220, 230, 230); width: 100%; display: flex; justify-content: center; flex-direction: column; height: 80vh;">
+                     <div style="align-self: center; margin-top: 20px;">
+                        <h4 style="font-weight: bold;" th:text="${config.getDepartment().getDepartment_name()}"></h4>
+                    </div>
+                    <div style="align-self: center; margin-top: 20px;">
+                        <h6 style="font-weight: bold; color: rgb(53, 131, 169);">
+                            CONFIGURATION</h6>
+                    </div>
+                    <div style="align-self: center; margin-top: 20px;">
+                        <th:block th:switch="${config.isEditable()}">
+                            <a href="#" class="btn btn-dark btn-lg" th:case="${false}" aria-disabled="true">Edit Details</a>
+                            <a th:href="@{/edit_config(con=${config.getSba_config_id()})}" class="btn btn-dark btn-lg" th:case="${true}">Edit Details</a>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+            <div id="info">
+                <div id="row-one" style="width: 100%">
+                    <div style="background-color: rgb(16, 196, 165); width: 100%;">
+                        <div style="text-align: center; color: white;">
+                            <h4 style="padding-top: 10px;">CONFIGURATION ID</h4>
+                            <h1 th:text="${config.getSba_config_id()}"></h1>
+                        </div>
+                    </div>
+                    <div style="background-color: rgb(81, 147, 207); width: 100%;" >
+                        <div style="text-align: center; color: white;">
+                            <h4 style="padding-top: 10px;">NO. OF CLASS WORK</h4>
+                            <h1 th:text="${config.getNumber_of_classwork_columns()}"></h1>
+                        </div>
+                    </div>
+                </div>
+                <div id="row-two" style="height: 100%; display: grid; grid-template-columns: 1fr 1fr;">
+                    <div style="width: 100%; height: 100%; display:flex; flex-direction:column; margin-right: 10px;">
+                        <div style="display: flex; border-bottom:solid 3px rgb(225, 225, 225); width: 100%;text-align: left;flex-direction:column;">
+                            <h4 style="color: rgb(173, 188, 205); padding-left: 10px;">DEPARTMENT</h4>
+                            <h5 style="color: rgb(53, 131, 169);  padding-top: 10px; padding-left: 10px;" th:text="${config.getDepartment().getDepartment_name()}"></h5>
+                        </div>
+                        <div style="display: flex; border-bottom:solid 3px rgb(225, 225, 225); width: 100%;text-align: left; flex-direction:column;">
+                            <h4 style="color: rgb(173, 188, 205);padding-left: 10px;">STATUS</h4>
+                            <h5 style="color: rgb(53, 131, 169); padding-top: 10px; padding-left: 10px;" th:text="${config.getStatus()}"></h5>
+                        </div>
+                        <div style="display: flex; border-bottom:solid 3px rgb(225, 225, 225); width: 100%;text-align: left; flex-direction:column;">
+                            <h4 style="color: rgb(173, 188, 205); padding-left: 10px;">ACADEMIC YEAR</h4>
+                            <h5 style="color: rgb(53, 131, 169); padding-top: 10px; padding-left: 10px;" th:text="${config.getAcademic_year().getFirst_year()+'/'+
+                             config.getAcademic_year().getLast_year()}"></h5>
+                        </div>
+                        <div style="display: flex; border-bottom:solid 3px rgb(225, 225, 225); width: 100%;text-align: left; flex-direction:column;">
+                            <h4 style="color: rgb(173, 188, 205); padding-left: 10px;">CLASS WORK SCALE</h4>
+                            <h5 style="color: rgb(53, 131, 169); padding-top: 10px; padding-left: 10px;" th:text="${config.getClasswork_scale() + '%'}"></h5>
+                        </div>
+                    </div>  
+                    <div style="width: 100%; height: 100%; display:flex; justify-content: center; border-left:solid 3px rgb(225, 225, 225);">
+                        <div>
+                            <table class="table table-striped" style="width: max-content;">
+                                <thead style="text-align: center;">
+                                    <tr>
+                                        <th>CLASS WORK</th>
+                                        <th>MAXIMUM VALUE</th>
+                                    </tr>
+                                </thead>
+                                <tbody style="text-align: center;">
+                                    <tr th:each="max,item : ${config.getMaximum_class_work_mark()}">
+                                        <td th:text="'CLS WRK '+${item.index + 1}"></td>
+                                        <td th:text="${max}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+       </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

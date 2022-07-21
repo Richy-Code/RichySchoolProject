@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{view_student_profile.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>VIEW TEACHER PROFILE</title>
+</head>
+<body>
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><h3 style="color: white;">TEACHER PROFILE</h3></li>
+            <li><a th:href="@{/admin}">HOME</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    <div id="student-details">
+        <div id="stu-details">
+            <h3 style="color: rgb(144, 146, 147);">TEACHER DETAILS</h3>
+        </div>
+       <div id="sec-two">
+            <div id="img">
+                <div style="background-color: rgb(220, 230, 230); width: 100%; display: flex; justify-content: center; flex-direction: column; height: 80vh;">
+                    <div style=" align-self: center;">
+                        <h1 style="font-size: 60px; color: white; width: 150px; height: 150px; border-radius: 
+                        50%; background-color: #121212; text-align: center; padding-top: 28px; font-weight: bolder;" th:text="${staff.getFirst_name().charAt(0) + ' '+ staff.getLast_name().charAt(0)}"></h1>
+                    </div>
+                     <div style="align-self: center; margin-top: 20px;">
+                        <h4 style="font-weight: bold;" th:text="${staff.getFullName()}"></h4>
+                    </div>
+                    <div style="align-self: center; margin-top: 20px;">
+                        <h6 style="font-weight: bold; color: rgb(53, 131, 169);">
+                            TEACHER</h6>
+                    </div>
+                    <div style="align-self: center; margin-top: 20px;">
+                        <a th:href="@{/edit_staff_profile(staff=${staff.getTeacher_id()})}" class="btn btn-dark btn-lg">Edit Details</a>
+                    </div>
+                </div>
+            </div>
+            <div id="info">
+                <div id="row-one" style="width: 100%">
+                    <div style="background-color: rgb(16, 196, 165); width: 100%;">
+                        <div style="text-align: center; color: white;">
+                            <h4 style="padding-top: 10px;">TEACHER ID</h4>
+                            <h1 th:text="${staff.getTeacher_id()}"></h1>
+                        </div>
+                    </div>
+                    <div style="background-color: rgb(81, 147, 207); width: 100%;" >
+                        <div style="text-align: center; color: white;">
+                            <h4 style="padding-top: 10px;">CLASS TEACHER</h4>
+                            <th:block th:switch="${class.getClass_name()}">
+                                <h1 th:case="null" th:text="'NO CLASS'"></h1>
+                                <h1 th:case="' '" th:text="'NO CLASS'"></h1>
+                                <h1 th:case="*" th:text="${class.getClass_name()}"></h1>
+                            </th:block>
+                        </div>
+                    </div>
+                </div>
+                <div id="row-two" style="height: 100%; display: grid; grid-template-columns: 1fr 1fr;">
+                    <div style="display: flex; border-bottom:solid 3px rgb(225, 225, 225); width: 100%; text-align: left;"> 
+                        <div style="padding-left: 10px; padding-top: 20px;"> 
+                            <h4 style="color: rgb(173, 188, 205);">Teacher ID</h4>
+                            <h5 style="color: rgb(53, 131, 169);" th:text="${staff.getTeacher_id()}"></h5>
+                        </div>
+                    </div>
+                    <div style="display: flex; border-bottom:solid 3px rgb(225, 225, 225); width: 100%; text-align: left;">
+                        <div style="padding-left: 10px; padding-top: 20px;"> 
+                            <h4 style="color: rgb(173, 188, 205);">FULL NAME</h4>
+                            <h5 style="color: rgb(53, 131, 169);" th:text="${staff.getFullName()}"></h5>
+                        </div>
+                    </div>
+                    <div style="display: flex; border-bottom:solid 3px rgb(225, 225, 225); width: 100%;text-align: left;">
+                        <div style="padding-left: 10px; padding-top: 20px;"> 
+                            <h4 style="color: rgb(173, 188, 205);">CONTACT</h4>
+                            <h5 style="color: rgb(53, 131, 169);" th:text="${staff.getContact()}"></h5>
+                        </div>
+                    </div>
+                    <div style="display: flex; border-bottom:solid 3px rgb(225, 225, 225); width: 100%;text-align: left;">
+                        <div style="padding-left: 10px; padding-top: 20px;"> 
+                            <h4 style="color: rgb(173, 188, 205);">GENDER</h4>
+                            <h5 style="color: rgb(53, 131, 169);" th:text="${staff.getContact()}"></h5>
+                        </div>
+                    </div>
+                    <div style="display: flex; border-bottom:solid 3px rgb(225, 225, 225); width: 100%;text-align: left;">
+                        <div style="padding-left: 10px; padding-top: 20px;"> 
+                            <h4 style="color: rgb(173, 188, 205);">CLASSES ASSIGNED</h4>
+                            <h5 style="display: flex;" th:text="${#strings.listJoin(staff.getTeacherClasses(),', ')}"></h5>
+                        </div>
+                    </div>
+                    <div style="display: flex; border-bottom:solid 3px rgb(225, 225, 225); width: 100%;text-align: left;">
+                        <div style="padding-left: 10px; padding-top: 20px;"> 
+                            <h4 style="color: rgb(173, 188, 205);">SUBJECTS ASSIGNED</h4>
+                            <h5 style="display: flex;" th:text="${#strings.listJoin(staff.getTeacherSubjects(),', ')}"></h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+       </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

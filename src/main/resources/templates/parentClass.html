@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{data_tables_css.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <script  th:src="@{data_tables_jquery.js}"></script>
+    <script  th:src="@{data_tables_js.js}"></script>
+    <link rel="stylesheet" th:href="@{student_profile.css}">
+    <script>
+        $(document).ready(function () {
+                $('#parentClass_data').DataTable();
+            });
+    </script>
+    <style>
+        table tbody tr{
+            text-align: center;
+        }
+    </style>
+    <title>PARENT CLASS</title>
+</head>
+<body>
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><h3 style="color: white;">PARENT CLASSES</h3></li>
+            <li><a th:href="@{/admin}">HOME</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    <div id="tbl">
+        <table id="parentClass_data" class="display" style="width: 100%;" border="1">
+            <thead>
+                <tr>
+                    <th>CLASS NAME</th>
+                    <th>DEPARTMENT</th>
+                    <th>VIEW</th>
+                    <th>MERGE</th>
+                    <th>SPLIT</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="parent : ${parentClass}">
+                    <td th:text="${parent.getParentClassName()}"></td>
+                    <td th:text="${parent.getClass_department().getDepartment_name()}"></td>
+                    <td><a th:href="@{/view_parent_class(parent=${parent.getParentClassId()})}" class="btn btn-success">VIEW</a></td>
+                    <td><a th:href="@{/merge_parent_class(parent=${parent.getParentClassId()})}" class="btn btn-primary">MERGE</a></td>
+                    <td><a th:href="@{/split_parent_class(parent=${parent.getParentClassId()})}" class="btn btn-dark">SPLIT</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

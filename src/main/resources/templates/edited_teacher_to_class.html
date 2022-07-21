@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <link rel="stylesheet" th:href="@{teachers_to_class.css}">
+    <title>ADD TEACHERS TO CLASS</title>
+</head>
+<body>
+<div id="main-content">
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><h3 style="color: white;">ADD CLASS</h3></li>
+            <li><a th:href="@{admin}">HOME</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    <div>
+        <h1 class="lab">ASSIGN TEACHERS TO <sp th:text="${class.getClass_name().toUpperCase()}"></sp></h1>
+    </div>
+    <div style="align-self: center; margin-top: 10px">
+        <form action="/save_edited_class" th:object="${class}">
+            <input type="hidden" th:value="${class.getClass_name()}" th:field="*{class_name}">
+            <input type="hidden" th:value="${class.getClass_department().getDepartmentID()}" th:field="*{class_department.departmentID}">
+            <input type="hidden" th:value="${class.getClass_teacher_id().getTeacher_id()}" th:field="*{class_teacher_id.teacher_id}">
+            <table class="table table-bordered" style="width: fit-content;">
+                <thead>
+                <tr style="text-align: center;">
+                    <th scope="col">FULL NAME</th>
+                    <th scope="col">SUBJECTS</th>
+                    <th scope="col">CURRENT CLASSES</th>
+                    <th scope="col">ASSIGN CLASS</th>
+                </tr>
+                </thead>
+                <th:block th:object="${teachers}">
+                    <tbody th:each="tch, item : *{list}">
+                    <input type="hidden" th:field="*{list[__${item.index}__].teacher_id}">
+                    <tr th:with="subjs = *{list[__${item.index}__].getTeacherSubjects()},clss = *{list[__${item.index}__].getTeacherClasses()}">
+                        <td th:text="*{list[__${item.index}__].getFullName()}"></td>
+                        <td  th:text="${#strings.listJoin(subjs,', ')}"></td>
+                        <td  th:text="${#strings.listJoin(clss,', ')}"></td>
+                        <td class="cent"><input type="checkbox" class="form-check-input" th:field="*{list[__${item.index}__].selected}" value="yes"></td>
+                    </tr>
+                    </tbody>
+                </th:block>
+            </table>
+            <div style="display: flex; justify-content:center;"><input type="submit" value="SAVE" class="btn btn-primary btn-lg"></div>
+        </form>
+    </div>
+</div>
+<script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

@@ -1,10 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{data_tables_css.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <script  th:src="@{data_tables_jquery.js}"></script>
+    <script  th:src="@{data_tables_js.js}"></script>
+    <link rel="stylesheet" th:href="@{student_profile.css}">
+    <script>
+        $(document).ready(function () {
+            $('#opt_main_data').DataTable();
+        });
+    </script>
+    <style>
+        table tbody tr{
+            text-align: center;
+        }
+    </style>
+    <title>SUBJECTS</title>
 </head>
 <body>
-
+<div id="nav-bar">
+    <ul id="nav-link">
+        <li><h3 style="color: white;">SUBJECTS</h3></li>
+        <li><a th:href="@{/admin}">HOME</a></li>
+        <li><a th:href="@{/logout}">LOGOUT</a></li>
+    </ul>
+</div>
+<div style="text-align: center; margin-top: 15px; display: flex; justify-content: center;">
+    <div style="margin-left: 20px;"><a th:href="@{/add_opt_subject}" class="btn btn-primary btn-lg">ADD SUBJECT</a></div>
+    <div style="margin-left: 20px;"><a th:href="@{/opt_student_form}" class="btn btn-primary btn-lg">ASSIGN STUDENTS</a></div>
+</div>
+<div id="tbl">
+    <table id="opt_main_data" class="display" style="width: 100%;" border="1">
+        <thead>
+        <tr>
+            <th>NAME</th>
+            <th>DEPARTMENT</th>
+            <th>N0. OF SUBJECT</th>
+            <th>VIEW</th>
+            <th>EDIT</th>
+            <th>DELETE</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="sub : ${subjects}">
+            <td th:text="${sub.getOpt_sub_name()}"></td>
+            <td th:text="${sub.getDepartment_subject().getDepartment_name()}"></td>
+            <td th:text="${sub.getSubjectsSet().size()}"></td>
+            <td><a th:href="@{/view_opt_main(sub=${sub.getOpt_sub_id()})}" class="btn btn-primary">View</a></td>
+            <td><a th:href="@{/edit_opt_main(sub=${sub.getOpt_sub_id()})}" class="btn btn-success">Edit</a></td>
+            <td><a th:href="@{/delete_opt_verify(sub=${sub.getOpt_sub_id()})}" class="btn btn-danger">Delete</a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<script th:src="@{bootstrap_js.js}"></script>
 </body>
 </html>

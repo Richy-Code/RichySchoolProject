@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{teacher_home_page.css}">
+    <title>HOME_PAGE</title>
+</head>
+<body>
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><a th:href="@{/teacher_exams_entry_form}">EXAMS</a></li>
+            <li><a th:href="@{/teacher_sba_entry_form}">SBA</a></li>
+            <li><a th:href="@{/record_form}">REPORT</a></li>
+            <li><a th:href="@{/students_list_form}">STUDENTS</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    <div style="display: flex; justify-content: center; color: rgb(0,0,0); margin-top: 20%; font-size: 30px;">
+        <h2>KING INTERNATIONAL</h2>
+    </div>
+</body>
+</html>

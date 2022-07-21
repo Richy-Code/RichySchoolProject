@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{teacher_sba_page.css}">
+    <link rel="stylesheet" th:href="@{data_tables_css.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <script  th:src="@{data_tables_jquery.js}"></script>
+    <script  th:src="@{data_tables_js.js}"></script>
+    <title>ASSESSMENT_ENTRY</title>
+        
+    <script>
+        $(document).ready(function () {
+                $('#exams_entry').DataTable();
+            });
+    </script>
+</head>
+<body>
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><a th:href="@{/teacher_home_page}"></a></li>
+            <li><a th:href="@{/exams_page(trm=${term.getTerm_id()},cls=${class.getClass_id()}
+            ,sub=${subject.getSubject_id()})}">EXAMS ENTRY</a></li>
+            <li><a th:href="@{/terminal_report(trm=${term.getTerm_id()},cls=${class.getClass_id()}
+            ,sub=${subject.getSubject_id()})}">REPORT</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    <h1 id="subject-title" th:text="${subject.getSubject_name()}"></h1>
+    <h5>SCHOOL BASE ASSESSMENT ENTRY</h5>
+    <div id="section-two">
+        <div class="select-one">
+            <h1 th:text="${class.getClass_name()}"></h1>
+        </div> 
+        <div class="select-one">
+            <h1 th:text="${term.getTerm_name()}"></h1>
+        </div> 
+    </div>
+    <div id="tbl">
+        <form action="/save_sba_entry" id="exams_form" th:object="${sba_list}">
+            <input type="hidden" name="cls_id" th:value="${class.getClass_id()}">
+            <input type="hidden" name="subj_id" th:value="${subject.getSubject_id()}">
+            <input type="hidden" name="trm_id" th:value="${term.getTerm_id()}">
+            <table id="exams_entry" class="display" style="width:100%" border="1">
+                <thead>
+                    <tr>
+                        <th>NAME</th>
+                        <th th:each="i : ${(#numbers.sequence(1,sba_config.getNumber_of_classwork_columns()))}"
+                            th:text="wrk + ${i}"
+                        ></th>
+                        <th>TOTAL (A)</th>
+                        <th th:text="'A' +' '+'(' + ${sba_config.getClasswork_scale()}+ '%'+ ')'"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="student, items : *{sbaEntries}">
+                        <input type="hidden" th:field="*{sbaEntries[__${items.index}__].student_id}">
+                        <td th:text="*{sbaEntries[__${items.index}__].getFull_name()}"></td>
+                        <th:block>
+                            <td th:each="cls_mark,it : *{sbaEntries[__${items.index}__].getClass_work()}">
+                                <input type="number" min="0" step="any" required class="exams_control"
+                                       th:value="${cls_mark}" th:field="*{sbaEntries[__${items.index}__].class_work[__${it.index}__]}"></td>
+                        </th:block>
+                        <td th:text="*{sbaEntries[__${items.index}__].getTotal()}"></td>
+                        <td th:text="*{sbaEntries[__${items.index}__].getPercent_of_total_sba()}"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="submit" class=" btn btn-primary" id="btn-submit">SUBMIT</button>
+        </form>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

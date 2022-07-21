@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{exams_home_page.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>SBA CONFIGURATION</title>
+</head>
+<body>
+    <div id="main-content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><h3 style="color: white;">SBA CONFIGURATION</h3></li>
+                <li><a th:href="@{/admin}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div id="section-two">
+            <div style="text-align: center; width: auto;">
+                <form action="/sba_config_next" th:object="${config}">
+                    <input type="hidden" th:value="${config.getSba_config_id()}" th:field="*{sba_config_id}">
+                    <table>
+                        <tbody id="bdy">
+                            <tr>
+                                <td class="right">DEPARTMENT</td>
+                                <td class="left">
+                                    <select name="cls"  class="form-select" required th:field="*{department.departmentID}">
+                                        <option th:each="dep : ${dept}" th:value="${dep.getDepartmentID()}"
+                                         th:text="${dep.getDepartment_name()}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="right">NO. OF CLS WRK</td>
+                                <td class="left">
+                                    <input type="number" required min="1" id="num" class="form-control" th:field="*{number_of_classwork_columns}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="right">CLS WRK SCALE</td>
+                                <td class="left">
+                                    <input type="number" required min="1" class="form-control" placeholder="percentage"
+                                     th:field="*{classwork_scale}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="right">ACADEMIC YEAR</td>
+                                <td class="left">
+                                    <input type="text" readonly th:value="${year.getFirst_year() +'/'+ year.getLast_year()}">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <input type="submit" value="NEXT" class="btn btn-primary btn-lg" style="margin-top: 30px;">
+                </form>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

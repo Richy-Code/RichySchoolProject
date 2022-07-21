@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{data_tables_css.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <script  th:src="@{data_tables_jquery.js}"></script>
+    <script  th:src="@{data_tables_js.js}"></script>
+    <link rel="stylesheet" th:href="@{teachers.css}">
+    <title>PROMOTION RESULTS</title>
+    <script>
+        $(document).ready(function () {
+                $('#promotion_data').DataTable();
+            });
+    </script>
+    <style>
+        #promotion_data tbody tr{
+            text-align: center;
+        }
+    </style>
+    <title>Document</title>
+</head>
+<body>
+    <div id="main-content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><h3 style="color: white;">PROMOTION RESULTS</h3></li>
+                <li><a th:href="@{/admin}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div style="align-self: center;">
+            <table class="display" id="promotion_data" border="1" style="width: 100%;">
+                <thead style="text-align: center;">
+                    <tr>
+                        <th>CLASS NAME</th>
+                        <th>STUDENTS PROMOTED</th>
+                        <th>STUDENTS ON TRIAL</th>
+                        <th>STUDENTS REPEATED</th>
+                    </tr>
+                </thead>
+                <tbody style="text-align: center;">
+                    <tr th:each="res : ${results}">
+                        <td th:text="${res.getClasses().getClass_name()}"></td>
+                        <td th:text="${res.getNumberOfPassStudent()}"></td>
+                        <td th:text="${res.getNumberOfTrialStudent()}"></td>
+                        <td th:text="${res.getNumberOfFailStudent()}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

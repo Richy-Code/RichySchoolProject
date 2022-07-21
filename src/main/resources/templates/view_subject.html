@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{data_tables_css.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <script  th:src="@{data_tables_jquery.js}"></script>
+    <script  th:src="@{data_tables_js.js}"></script>
+    <link rel="stylesheet" th:href="@{student_profile.css}">
+    <script>
+        $(document).ready(function () {
+                $('#subject_data').DataTable();
+            });
+    </script>
+    <style>
+        table tbody tr{
+            text-align: center;
+        }
+    </style>
+    <title>SUBJECTS</title>
+</head>
+<body>
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><h3 style="color: white;">SUBJECTS</h3></li>
+            <li><a th:href="@{/admin}">HOME</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    <div style="text-align: center; margin-top: 15px; display: flex; justify-content: center;">
+        <div><a th:href="@{/add_subject}" class="btn btn-primary btn-lg">ADD SUBJECT</a></div>
+        <div style="margin-left: 20px;"><a th:href="@{/opt_main_sub}" class="btn btn-primary btn-lg">OPTIONAL SUBJECT</a></div>
+    </div>
+    <div id="tbl">
+        <table id="subject_data" class="display" style="width: 100%;" border="1">
+            <thead>
+                <tr>
+                    <th>SUBJECT NAME</th>
+                    <th>DEPARTMENT</th> 
+                    <th>TEACHER ASSIGNED</th>
+                    <th>EDIT</th>
+                    <th>DELETE</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="sub : ${subjects}">
+                    <td th:text="${sub.getSubject_name()}"></td>
+                    <td th:text="${sub.getDepartment_subject().getDepartment_name()}"></td>
+                    <td th:text="${sub.getTeacher_assigned().getFullName()}"></td>
+                    <td><a th:href="@{/edit_subject(sub=${sub.getSubject_id()})}" class="btn btn-success">Edit</a></td>
+                    <td><a th:href="@{/delete_subject_verify(sub=${sub.getSubject_id()})}" class="btn btn-danger">Delete</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

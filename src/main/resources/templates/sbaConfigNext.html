@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{exams_home_page.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>SBA CONFIGURATION</title>
+</head>
+<body>
+    <div id="main-content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><h3 style="color: white;">SBA CONFIGURATION</h3></li>
+                <li><a th:href="@{/admin}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div id="section-two">
+            <div style="text-align: center; width: auto;">
+                <form action="/save_config" th:object="${con}">
+                    <input type="hidden" th:value="${con.getSba_config_id()}" name="config" th:field="*{sba_config_id}">
+                    <table>
+                        <tbody id="bdy">
+                            <tr th:each="num, item : ${number}">
+                                <td class="right" th:text="'CLS WRK '+ ${item.index + 1}"></td>
+                                <td class="left">
+                                    <input type="number" required min="1" id="num" class="form-control" placeholder="maximum value (eg:15)"
+                                     th:field="*{maximum_class_work_mark[__${item.index}__]}">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <input type="submit" value="SUBMIT" class="btn btn-primary btn-lg" style="margin-top: 30px;">
+                </form>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

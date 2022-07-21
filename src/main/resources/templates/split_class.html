@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{exams_home_page.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>SPLIT CLASS</title>
+</head>
+<body>
+    <div id="main-content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><h3 style="color: white;">EXAMS ENTRY</h3></li>
+                <li><a th:href="@{/admin}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div id="section-two">
+            <div style="text-align: center; width: auto;">
+                <form action="/class_split">
+                    <input type="hidden" th:value="${parent}" name="parentId">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td class="right">NUMBER TO SPLIT</td>
+                                <td class="left"><input type="number" min="2" name="splitNum" required class="form-control"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <input type="submit" value="GO" class="btn btn-primary btn-lg" style="margin-top: 30px;">
+                </form>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

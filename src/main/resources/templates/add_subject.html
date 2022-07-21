@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{exams_home_page.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <script th:src="@{jquery-3.6.0.js}" type="text/javascript"></script>
+    <script>
+        $(document).ready(function (){
+            $("#dpt").change(function (){
+                let departmentId = $('option:selected', this).val();
+                $('#tch').empty();
+                $.ajax({
+                    type : 'GET',
+                    url : '/department_teachers/' + departmentId,
+                    dataType : 'json',
+                    contentType : 'application/json',
+                    success : function (result){
+                        /*<![CDATA[*/
+                        for (let i = 0; i < result.length;i++){
+                            $('#tch').append(new Option(result[i].fullName, result[i].teachId))
+                        }
+                        /*]]>*/
+                    }
+                })
+            });
+        });
+    </script>
+    <title>ADD SUBJECT</title>
+</head>
+<body>
+    <div id="main-content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><h3 style="color: white;">ADD SUBJECT</h3></li>
+                <li><a th:href="@{/admin}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div id="section-two">
+            <div style="text-align: center; width: auto;">
+                <h1 style="font-weight: bold;">NEW SUBJECT</h1>
+                <form action="/save_subject" style="margin-top: 10px;" th:object="${sub}">
+                    <input type="hidden" th:value="${sub.getSubject_id()}" th:field="*{subject_id}">
+                    <input type="hidden" name="edit" th:value="${edit}">
+                    <input type="hidden"  id="dis" th:value="${disable}">
+                    <input type="hidden" name="deptId" th:value="${dptId}">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td class="right">SUBJECT NAME</td>
+                                <td class="left">
+                                    <input type="text" class="form-control" required th:field="*{subject_name}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="right" style="padding-top: 20px;">DEPARTMENT</td>
+                                <td class="left" style="padding-top: 20px;">
+                                    <select name="dpt" id="dpt" class="form-select"   required th:field="*{department_subject.departmentID}">
+                                        <option th:each="dep : ${dept}" th:text="${dep.getDepartment_name()}"
+                                         th:value="${dep.getDepartmentID()}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="right" style="padding-top: 20px;">TEACHER ASSIGNED</td>
+                                <td class="left" style="padding-top: 20px;">
+                                    <select name="tch" id="cls" class="form-select"  required th:field="*{teacher_assigned.teacher_id}">
+                                        <option th:each="tch : ${teachers}" th:value="${tch.getTeacher_id()}"
+                                        th:text="${tch.getFullName()}"></option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <input type="submit" value="SAVE" class="btn btn-primary btn-lg" style="margin-top: 30px;">
+                </form>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+    <script>
+       const disValue = document.getElementById("dis").value;
+       if (parseInt(disValue) === 1){
+           document.getElementById("dpt").disabled = true;
+       }
+    </script>
+</body>
+</html>

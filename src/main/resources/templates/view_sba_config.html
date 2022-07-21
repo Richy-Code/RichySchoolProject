@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{teachers.css}">
+    <link rel="stylesheet" th:href="@{data_tables_css.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <script  th:src="@{data_tables_jquery.js}"></script>
+    <script  th:src="@{data_tables_js.js}"></script>
+    <title>CONFIGURATION</title>
+    <script>
+        $(document).ready(function () {
+                $('#config_data').DataTable();
+            });
+    </script>
+    <title>Document</title>
+</head>
+<body>
+    <div id="main-content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><h3 style="color: white;">SBA CONFIGURATION</h3></li>
+                <li><a th:href="@{/admin}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div style="text-align: center; margin-top: 15px;">
+            <a th:href="@{/add_configuration}" class="btn btn-primary btn-lg">Add CONFIGURATION</a>
+        </div>
+        <div style="align-self: center; margin-top: 10px;">
+            <table class="display" id="config_data" border="1" style="width: 100%;">
+                <thead style="text-align: center;">
+                    <tr>
+                        <th>CONFIG ID</th>
+                        <th>DEPARTMENT</th>
+                        <th>STATUS</th>
+                        <th>YEAR</th>
+                        <th>VIEW</th>
+                        <th>EDIT</th>
+                    </tr>
+                </thead>
+                <tbody style="text-align: center;">
+                    <tr th:each="con : ${config}">
+                        <td th:text="${con.getSba_config_id()}"></td>
+                        <td th:text="${con.getDepartment().getDepartment_name()}"></td>
+                        <td th:text="${con.getStatus()}"></td>
+                        <td th:text="${con.getAcademic_year().getFirst_year() + '/'+con.getAcademic_year().getLast_year()}"></td>
+                        <td><a th:href="@{/view_config(con=${con.getSba_config_id()})}" class="btn btn-primary">View</a></td>
+                        <th:block th:switch="${con.isEditable()}">
+                            <td th:case="${false}"><a href="#" aria-disabled="true" class=" btn btn-success">Edit</a></td>
+                            <td th:case="${true}"><a class=" btn btn-success" th:href="@{/edit_config(con=${con.getSba_config_id()})}">Edit</a></td>
+                        </th:block>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

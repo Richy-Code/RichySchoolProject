@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{add_teacher.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>GUARDIAN</title>
+</head>
+<body>
+    <div id="main-content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><h3 style="color: white;">ADD GUARDIAN</h3></li>
+                <li><a th:href="@{/admin}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div id="section-two">
+            <div style="text-align: center; width: auto;">
+                <h1 style="font-weight: bold;">NEW GUARDIAN</h1>
+                <form action="/save_guardian" style="margin-top: 10px;" enctype="multipart/form-data" th:object="${guardian}">
+                    <input type="hidden" name="stu" th:value="${student}">
+                    <div style="display: flex;">
+                        <div>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td class="right">FIRST NAME</td>
+                                        <td class="left">
+                                            <input type="text" class="form-control" placeholder="first_name" th:field="*{guard_first_name}">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="right">MIDDLE NAME</td>
+                                        <td class="left">
+                                            <input type="text" class="form-control" placeholder="middle _name" th:field="*{guard_middle_name}">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="right">LAST NAME</td>
+                                        <td class="left">
+                                            <input type="text" class="form-control" placeholder="first_name" th:field="*{guard_last_name}">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="right" style="padding-top: 10px;">CONTACT</td>
+                                        <td class="left">
+                                            <input type="text" class="form-control" placeholder="eg: 0245778899" pattern="[0]{1}[0-9]{9}"
+                                             th:field="*{guard_contact}">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="right" style="padding-top: 10px;">RELATIONSHIP</td>
+                                        <td class="left" style="padding-top: 10px;">
+                                            <select name="dpt" id="cls" class="form-select" th:field="*{relationType.relation_id}">
+                                                <option th:each="rel : ${relate}" th:value="${rel.getRelation_id()}"
+                                                 th:text="${rel.getRelationship()}"></option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="right" style="padding-top: 10px;">GENDER</td>
+                                        <td style="display: flex; padding-top: 10px; padding-left: 20px;">
+                                            <input type="radio" name="gender" value="M" class="form-check"><span style="margin-left: 10px;">MALE</span> 
+                                            <input type="radio" name="gender" value="F" class="form-check" style="margin-left: 50px;"><span style="margin-left: 10px;">FEMALE</span> 
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                     <input type="submit" value="SAVE" class="btn btn-primary btn-lg" style="margin-top: 10px;">
+                </form>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

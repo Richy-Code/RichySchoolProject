@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{filling_report_css.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>REPORT</title>
+</head>
+<body>
+    <div id="main_content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><a th:href="@{/teacher_home_page}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div id="section-two">
+            <div class="select-one">
+                <form action="/search_filling_report" style="display: flex">
+                    <input type="hidden" name="trm" th:value="${term.getTerm_id()}">
+                    <input type="hidden" name="cls" th:value="${class.getClass_id()}">
+                    <input type="hidden" name="idx" th:value="${index}">
+                    <input type="text" name="stuId" class="form-control" placeholder="search by student id" required>
+                    <button type="submit" class="btn btn-outline-secondary">Search</button>
+                </form>
+            </div>
+            <di><a href="#" class="btn btn-primary">Progress Report</a></di>
+        </div>
+        <div id="report">
+            <form action="/save_report_details" th:object="${reportDetail}">
+                <div id="border">
+                    <input type="hidden" name="stu" th:value="${report.getStudent().getStudent_id()}">
+                    <input type="hidden" name="cls" th:value="${class.getClass_id()}">
+                    <input type="hidden" name="trm" th:value="${term.getTerm_id()}">
+                    <input type="hidden" name="idx" th:value="${index}">
+                    <input type="hidden" name="pos_in_class" th:value="${report.getPosition_in_class()}">
+                    <div id="sch_info">
+                        <img src="logo.jpg" alt="sch_logo" style="margin-right: 30px;">
+                        <div style="text-align: center;">
+                            <h3 style="font-weight: bold;">KING INTERNATIONAL SCHOOL</h3>
+                            <h6 style="font-weight: bold;">P.O.Box 1234</h6>
+                            <h6>Tel: 0241234567</h6>
+                            <h4 style="font-weight: bold;">CODE IS POETRY</h4>
+                        </div>
+                        <img src="stu10.png" alt="student_pic" style="margin-left: 30px;">
+                    </div>
+                    <div>
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; margin-top: 10px;">
+                            TERMINAL REPORT</h4>
+                    </div>
+                    <div id="term-stu-info">
+                        <div>
+                            <table>
+                                <tbody>
+                                <tr>
+                                    <td class="left">STUDENT NAME :</td>
+                                    <td class="right" th:text="${report.getFull_name()}"></td>
+                                </tr>
+                                <tr>
+                                    <td class="left">CLASS :</td>
+                                    <td class="right" th:text="${class.getClass_name()}"></td>
+                                </tr>
+                                <tr>
+                                    <td class="left">ACADEMIC YEAR :</td>
+                                    <td class="right" th:text="${academic_year.getFirst_year()+'/'+ academic_year.getLast_year()}"></td>
+                                </tr>
+                                <tr>
+                                    <td class="left">POSITION :</td>
+                                    <td class="right" th:text="${report.getPosition_in_class()}"></td>
+                                </tr>
+                                <tr>
+                                    <td class="left">ATTENDANCE :</td>
+                                    <td class="right"><input type="number" name="att" id="attended" min="0" width="30px"
+                                                             required th:field="*{attendance}"> OUT
+                                        <th:block th:object="${commonDetails}">
+                                            <input type="number" id="total" name="tol" min="0" width="30px" required th:field="*{total_attendance}">
+                                        </th:block>
+                                         DAYS
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="padding-left: 30px;">
+                            <table>
+                                <tbody>
+                                <tr>
+                                    <td class="left">STUDENT ID :</td>
+                                    <td class="right" th:text="${report.getStudent().getStudent_id()}"></td>
+                                </tr>
+                                <tr>
+                                    <td class="left">NO. ON ROLL :</td>
+                                    <td class="right" th:text="${num_on_roll}"></td>
+                                </tr>
+                                <tr>
+                                    <td class="left">TERM :</td>
+                                    <td class="right" th:text="${term.getTerm_name()}"></td>
+                                </tr>
+                                <tr>
+                                    <td class="left">PROMOTED TO/REPEATED IN :</td>
+                                    <td class="right" th:text="${report.getReportDetails().getPromo_repeated_class()}"></td>
+                                </tr>
+                                <tr>
+                                    <td class="left">NEXT TERM BEGINS :</td>
+                                    <td class="right" th:text="${commonDetails.getNext_term_begins()}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="report-summary">
+                        <table border="1px" id="tbl">
+                            <thead>
+                            <tr style="text-align: center;">
+                                <th style="padding-bottom: 20px;">SUBJECT(S)</th>
+                                <th style="padding-left: 5px; padding-right: 5px;">CLASS SCORE <br th:text="${config.getClasswork_scale()} + '%'"></th>
+                                <th style="padding-left: 5px; padding-right: 5px;">EXAMS SCORE <br th:text="${100 - config.getClasswork_scale()} + '%'"></th>
+                                <th style="padding-left: 5px; padding-right: 5px; padding-bottom: 20px;">TOTAL SCORE</th>
+                                <th style="padding-left: 5px; padding-right: 5px; padding-bottom: 20px;">GRADE</th>
+                                <th style="padding-left: 5px; padding-right: 5px; padding-bottom: 20px;">REMARKS</th>
+                                <th style="padding-left: 5px; padding-right: 5px;">SUBJECT <br>POSITION</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="sub : ${report.getSummaryList()}">
+                                <td th:text="${sub.getSubject_name()}"></td>
+                                <td class="center" th:text="${sub.getClass_score()}"></td>
+                                <td class="center" th:text="${sub.getExams_score()}"></td>
+                                <td class="center" th:text="${sub.getTotal()}"></td>
+                                <td class="center" th:text="${sub.getGrade()}"></td>
+                                <td class="center" th:text="${sub.getRemarks()}"></td>
+                                <td class="center" th:text="${sub.getPosition()}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="final-section">
+                        <div id="first">
+                            <div>
+                                <table>
+                                    <tbody>
+                                    <tr>
+                                        <td>TOTAL SCORE :</td>
+                                        <td style="padding-left: 10px;" th:text="${report.getTotal_score()}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div>
+                                <table>
+                                    <tbody>
+                                    <tr>
+                                        <td>AVERAGE SCORE :</td>
+                                        <td style="padding-left: 10px;" th:text="${report.getAverage_score()}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div>
+                                <table>
+                                    <tbody>
+                                    <tr>
+                                        <td>AGGREGATE :</td>
+                                        <td style="padding-left: 10px;" th:text="${report.getAggregate()}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div id="final">
+                            <div>
+                                <table>
+                                    <tbody>
+                                    <tr>
+                                        <td class="left">STUDENT'S CONDUCT :</td>
+                                        <td>
+                                            <input list="conducts" name="conduct" required th:field="*{attitude}" pattern="^[A-Za-z ]+$"
+                                                   oninvalid="setError(this)"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="left">STUDENT'S INTEREST : </td>
+                                        <td><input type="text" list="interests" name="interest" required pattern="^[A-Za-z ]+$"
+                                                   th:field="*{interest}" oninvalid="setError(this)"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="left">TEACHER'S REMARKS :</td>
+                                        <td><input type="text" name="teacher_remark" list="teach_rem" required pattern="^[A-Za-z ]+$"
+                                                   th:field="*{teacher_remark}" oninvalid="setError(this)"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="left">HEAD TEACHER'S REMARKS :</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="left">TEACHER'S SIGNATURE :</td>
+                                        <td class="right" th:text="${commonDetails.getClassTeacherSignature()}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="left">HEAD TEACHER'S SIGNATURE :</td>
+                                        <td id="no-border" th:text="${commonDetails.getHeadSignature()}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: 10px;" id="btn">
+                    <div style="padding-right: 200px;"><a th:href="@{/prev_report_filling(trm=${term.getTerm_id()},cls=${class.getClass_id()},
+                    index=${index})}" class="btn btn-primary">PREV</a></div>
+                    <div style="padding-right: 200px;"><button class="btn btn-primary" type="submit" id="save">SAVE</button></div>
+                    <div style="padding-right: 200px;"><a th:href="@{/next_report_filling(trm=${term.getTerm_id()},cls=${class.getClass_id()},
+                    index=${index})}" class="btn btn-primary">NEXT</a></div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <datalist id="conducts">
+        <option th:each="con : ${conduct}" th:value="${con.getConduct()}"></option>
+    </datalist>
+    <datalist id="interests">
+        <option th:each="int : ${interest}" th:value="${int.getConduct()}"></option>
+    </datalist>
+    <datalist id="teach_rem">
+        <option th:each="rem : ${remarks}" th:value="${rem.getConduct()}"></option>
+    </datalist>
+    <datalist id="head_rem">
+        <option th:each="rem : ${remarks}" th:value="${rem.getConduct()}"></option>
+    </datalist>
+    <script th:src="@{bootstrap_js.js}"></script>
+    <script>
+        function  setError(event){
+            event.target.setCustomValidity("field is required");
+        }
+    </script>
+</body>
+</html>

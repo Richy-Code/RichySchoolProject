@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{data_tables_css.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <script  th:src="@{data_tables_jquery.js}"></script>
+    <script  th:src="@{data_tables_js.js}"></script>
+    <link rel="stylesheet" th:href="@{classes.css}">
+    <title>CLASSES</title>
+    <script>
+        $(document).ready(function () {
+                $('#class_data').DataTable();
+            });
+    </script>
+</head>
+<body>
+    <div id="main-content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><h3 style="color: white;">CLASSES</h3></li>
+                <li><a th:href="@{/admin}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div style="align-self: center; margin-top: 15px;">
+            <a th:href="@{/addClass}" class="btn btn-primary btn-lg">Add Class</a>
+            <a th:href="@{/parentClass}" class="btn btn-primary btn-lg">Main Classes</a>
+        </div>
+        <div style="text-align: center; margin-top: 15px;">
+            <h4 style="color: rgb(117, 117, 117);">Existing Class List</h4>
+        </div>
+        <div style="align-self: center;">
+            <table class="display" id="class_data" border="1px" style="width: 100%;">
+                <thead style="text-align: center;">
+                    <tr>
+                        <th>CLASS</th>
+                        <th>CLASS ID</th>
+                        <th>MAIN CLASS</th>
+                        <th>DEPARTMENT</th>
+                        <th>CLASS TEACHER</th>
+                        <th>NO. OF STUDENTS</th>
+                        <th>EDIT CLASS INFO</th>
+                        <th>VIEW STUDENTS</th>
+                    </tr>
+                </thead>
+                <tbody style="text-align: center;">
+                    <tr th:each="cls,item : ${classes}">
+                        <td th:text="${cls.getClass_name()}"></td>
+                        <td th:text="${cls.getClass_id()}"></td>
+                        <td th:text="${cls.getParentClass().getParentClassName()}"></td>
+                        <td th:text="${cls.getParentClass().getClass_department().getDepartment_name()}"></td>
+                        <th:block th:switch="${cls.getClass_teacher_id().getMiddle_name()}" >
+                            <td th:case="null" th:text="${cls.getClass_teacher_id().getFirst_name() + ' ' + cls.getClass_teacher_id().getLast_name()}"></td>
+                            <td th:case="*" th:text="${cls.getClass_teacher_id().getFirst_name() + ' '+
+                            cls.getClass_teacher_id().getMiddle_name()+' '+cls.getClass_teacher_id().getLast_name()}"></td>
+                        </th:block>
+                        <td th:text="${studentNumber.get(item.index)}"></td>
+                        <td><a th:href="@{/edit_class(cls=${cls.getClass_id()})}" class="btn btn-success">Edit</a></td>
+                        <td><a th:href="@{/admin_view_student(cls=${cls.getClass_id()})}" class="btn btn-success">View</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

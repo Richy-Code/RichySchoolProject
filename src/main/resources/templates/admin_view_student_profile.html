@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{view_student_profile.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>STUDENT PROFILE </title>
+</head>
+<body>
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><h3 style="color: white;">STUDENT PROFILE</h3></li>
+            <li><a th:href="@{/admin}">HOME</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    <div id="student-details">
+        <div id="stu-details">
+            <h3 style="color: rgb(144, 146, 147);">STUDENT DETAILS</h3>
+        </div>
+       <div id="sec-two">
+            <div id="img">
+                <div style="background-color: rgb(220, 230, 230); width: 100%; display: flex; justify-content: center; flex-direction: column; height: 80vh;">
+                    <div style="align-self: center;">
+                        <img th:src="@{${student.getPhotoImage()}}" alt="student_pic" style="border:
+                        solid 1px rgb(144, 146, 147); border-radius: 50%; margin-top: 20px;" width="100px" height="100px" >
+                    </div>
+                     <div style="align-self: center; margin-top: 20px;">
+                        <h4 style="font-weight: bold;" th:text="${student.getFullName()}"></h4>
+                    </div>
+                    <div style="align-self: center; margin-top: 20px;">
+                        <h6 style="font-weight: bold; color: rgb(53, 131, 169);">
+                            STUDENT</h6>
+                    </div>
+                    <div style="align-self: center; margin-top: 20px;">
+                        <a th:href="@{/edite_student_profile(stu=${student.getStudent_id()})}" class="btn btn-dark btn-lg">Edit Details</a>
+                    </div>
+                    <div style="align-self: center; margin-top: 20px;">
+                        <a th:href="@{/head_passed_record/{student_id}(student_id=${student.getStudent_id()})}" class="btn btn-dark btn-lg">TERMINAL REPORT</a>
+                    </div>
+                    <div style="align-self: center; margin-top: 20px;">
+                        <a th:href="@{/summary_report/{student_id}(student_id=${student.getStudent_id()})}" class="btn btn-dark btn-lg">PROGRESS REPORT</a>
+                    </div>
+                </div>
+            </div>
+            <div id="info">
+                <div id="row-one">
+                    <div style="background-color: rgb(16, 196, 165); width: 100%;">
+                        <div style="text-align: center; color: white;">
+                            <h4 style="padding-top: 10px;">STUDENT ID</h4>
+                            <h1 th:text="${student.getStudent_id()}"></h1>
+                        </div>
+                    </div>
+                    <div style="background-color: rgb(81, 147, 207); width: 100%;" >
+                        <div style="text-align: center; color: white;">
+                            <h4 style="padding-top: 10px;">CLASS</h4>
+                            <h1 th:text="${student.getClasses().getClass_name()}"></h1>
+                        </div>
+                    </div>
+                </div>
+                <div id="row-two">
+                    <table id="link">
+                        <tbody>
+                            <tr>
+                                <td><h4>STUDENT'S INFORMATION</h4></td>
+                                <td><h4>GUARDIAN'S INFORMATION</h4></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="display: grid; border-bottom:solid 3px rgb(225, 225, 225); width: 100%; text-align: left; grid-template-columns: 1fr 1fr;">
+                        <div style="padding-left: 10px;"> 
+                            <h4 style="color: rgb(173, 188, 205);">Student ID</h4>
+                            <h5 style="color: rgb(53, 131, 169);" th:text="${student.getStudent_id()}"></h5>
+                        </div>
+                        <div style="margin-left: 20px;"> 
+                            <h4 style="color: rgb(173, 188, 205);">Guardian Name</h4>
+                            <h5 style="color: rgb(53, 131, 169);" th:text="${student.getGuardian().getGuard_fullName()}"></h5>
+                        </div>
+                    </div>
+                    <div style="display: grid; border-bottom:solid 3px rgb(225, 225, 225); width: 100%; text-align: left; grid-template-columns: 1fr 1fr;margin-top: 20px;">
+                        <div style="padding-left: 10px;"> 
+                            <h4 style="color: rgb(173, 188, 205);">FULL NAME</h4>
+                            <h5 style="color: rgb(53, 131, 169);" th:text="${student.getFullName()}"></h5>
+                        </div>
+                        <div style="padding-left: 20px;"> 
+                            <h4 style="color: rgb(173, 188, 205);">Guardian Contact</h4>
+                            <h5 style="color: rgb(53, 131, 169);" th:text="${student.getGuardian().getGuard_fullName()}"></h5>
+                        </div>
+                    </div>
+                    <div style="display: grid; border-bottom:solid 3px rgb(225, 225, 225); width: 100%;text-align: left; grid-template-columns: 1fr 1fr;margin-top: 20px;">
+                        <div style="padding-left: 10px;"> 
+                            <h4 style="color: rgb(173, 188, 205);">GENDER</h4>
+                            <h5 style="color: rgb(53, 131, 169);" th:text="${student.getGender()}"></h5>
+                        </div>
+                        <div style="padding-left: 20px;"> 
+                            <h4 style="color: rgb(173, 188, 205);">RELATIONSHIP</h4>
+                            <h5 style="color: rgb(53, 131, 169);" th:text="${student.getGuardian().getRelationType().getRelationship()}"></h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+       </div>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

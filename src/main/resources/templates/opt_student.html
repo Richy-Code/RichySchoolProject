@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{student_profile.css}">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{data_tables_css.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <script  th:src="@{data_tables_jquery.js}"></script>
+    <script  th:src="@{data_tables_js.js}"></script>
+    <title>Document</title>
+    <script>
+        $(document).ready(function () {
+                $('#student_data').DataTable();
+            });
+    </script>
+    <style>
+        #student_data tbody tr{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><h3 style="color: white;">STUDENTS</h3></li>
+            <li><a th:href="@{/admin}">HOME</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    
+    <div style="text-align: center; text-decoration: underline;">
+        <h1>ASSIGN OPTIONAL SUBJECT TO STUDENT</h1>
+    </div>
+    <div id="tbl">
+        <form action="/save_opt_stu_subject" th:object="${optSubStudent}">
+            <table id="student_data" class="display" style="width: 100%;" border="1">
+                <thead>
+                    <tr>
+                        <th>FULL NAME</th>
+                        <th>STUDENT ID</th>
+                        <th th:each="head : ${optSubject}" th:text="${head.getSubject_name()}"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="subStu,item : *{subjectStudents}">
+                        <input type="hidden" th:value="*{subjectStudents[__${item.index}__].getStudent().getStudent_id()}"
+                        th:field="*{subjectStudents[__${item.index}__].getStudent().student_id}">
+                        <td th:text="*{subjectStudents[__${item.index}__].getStudent().getFullName()}"></td>
+                        <td th:text="*{subjectStudents[__${item.index}__].getStudent().getStudent_id()}"></td>
+                        <td th:each="sub : ${optSubject}">
+                            <input type="radio" class="form-check-input" th:field="*{subjectStudents[__${item.index}__].optSubjectId}"
+                                   required th:value="${sub.getSubject_id()}"></td>
+                    </tr>
+            </table>
+        </form>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

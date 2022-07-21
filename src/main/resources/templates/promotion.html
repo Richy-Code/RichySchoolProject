@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{exams_home_page.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>PROMOTION</title>
+</head>
+<body>
+    <div id="main-content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><h3 style="color: white;">PROMOTION</h3></li>
+                <li><a th:href="@{/admin}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div id="section-two">
+            <div style="text-align: center; width: auto;">
+                <form action="/promotion">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td class="right">PROMOTION CRITERIA</td>
+                                <td class="left">
+                                    <select name="criteria" id="criteria" class="form-select" required>
+                                        <option value="1">TERM THREE RESULTS ONLY</option>
+                                        <option value="2">AVERAGE MARK OF YEAR</option>
+                                        <option value="3">PROMOTE ALL STUDENTS</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="right" style="padding-top: 20px;">PASS MARK</td>
+                                <td class="left" style="padding-top: 20px;">
+                                    <input type="number" id="pass" name="pass" min="0" value="0" required  class="form-control">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="right" style="padding-top: 20px;">ON TRIAL MARK</td>
+                                <td class="left" style="padding-top: 20px;">
+                                    <input type="number" id="trial" min="0" name="trial" value="0"  class="form-control">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <input type="submit" value="SUBMIT" class="btn btn-primary btn-lg" style="margin-top: 30px;">
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById("criteria").addEventListener("change",function(){
+            if(parseInt(this.value) === 3){
+                document.getElementById("pass").setAttribute("disabled","true");
+                document.getElementById("trial").setAttribute("disabled","true");
+            }else{
+                document.getElementById("pass").removeAttribute("disabled");
+                document.getElementById("trial").removeAttribute("disabled");
+            }
+        })
+    </script>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

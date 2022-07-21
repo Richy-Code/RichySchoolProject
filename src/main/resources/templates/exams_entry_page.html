@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{exams_entry_page.css}">
+    <link rel="stylesheet" th:href="@{data_tables_css.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <script  th:src="@{data_tables_jquery.js}"></script>
+    <script  th:src="@{data_tables_js.js}"></script>
+    <title>EXAMS_ENTRY</title>
+    <script>
+        $(document).ready(function () {
+                $('#exams_entry').DataTable();
+            });
+    </script>
+</head>
+<body>
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><a th:href="@{/teacher_home_page}">HOME</a></li>
+            <li><a th:href="@{/sba_page(trm=${term.getTerm_id()},cls=${class.getClass_id()}
+            ,sub=${subject.getSubject_id()})}">SBA ENTRY</a></li>
+            <li><a th:href="@{/terminal_report(trm=${term.getTerm_id()},cls=${class.getClass_id()}
+            ,sub=${subject.getSubject_id()})}">REPORT</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    <h1 id="subject-title" th:text="${subject.getSubject_name()}"></h1>
+    <h3>EXAMINATION ENTRY</h3>
+    <div id="section-two">
+        <div class="select-one">
+            <h1 th:text="${class.getClass_name()}"></h1>
+        </div> 
+        <div class="select-one">
+            <h1 th:text="${term.getTerm_name()}"></h1>
+        </div>  
+    </div>
+    <div id="tbl">
+        <form action="/save_exams_entry" id="exams_form" th:object="${entry_list}">
+            <input type="hidden" name="cls_id" th:value="${class.getClass_id()}">
+            <input type="hidden" name="subj_id" th:value="${subject.getSubject_id()}">
+            <input type="hidden" name="trm_id" th:value="${term.getTerm_id()}">
+            <table id="exams_entry" class="display" style="width:100%" border="1">
+                <thead>
+                    <tr>
+                        <th>NAME</th>
+                        <th>EXAMS</th>
+                        <th th:text="'EXAMS '+'('+${100 -sbaConfig.getClasswork_scale()} +'%'+ ')'"><br>A</th>
+                        <th th:text="'SBA ' + '(' + ${sbaConfig.getClasswork_scale()} + '%' + ')'"><br>B</th>
+                        <th>TOTAL <br>A + B</th>
+                        <th>GRADE</th>
+                        <th>POSITION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="student, items : *{examsEntries}">
+                        <input type="hidden" th:field="*{examsEntries[__${items.index}__].studentId}">
+                        <input type="hidden" th:field="*{examsEntries[__${items.index}__].position}">
+                        <input type="hidden" th:field="*{examsEntries[__${items.index}__].total_sba}">
+                        <td th:text="*{examsEntries[__${items.index}__].getStudentFull_name()}"></td>
+                        <td><input type="number" min="0" max="" step="any" required class="exams_control"
+                                   th:field="*{examsEntries[__${items.index}__].examsScore}"></td>
+                        <td th:text="*{examsEntries[__${items.index}__].getPercent_of_total_exams()}"></td>
+                        <td th:text="*{examsEntries[__${items.index}__].getTotal_sba()}"></td>
+                        <td th:text="*{examsEntries[__${items.index}__].getTotal_exam_marks()}"></td>
+                        <td th:text="*{examsEntries[__${items.index}__].getGrade()}"></td>
+                        <td th:text="*{examsEntries[__${items.index}__].getPosition()}"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="submit" class=" btn btn-primary" id="btn-submit">SUBMIT</button>
+        </form>
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

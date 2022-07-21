@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+  <title>VERIFY DELETE</title>
+</head>
+<body>
+<div style="margin-top: 10%; height: 100%;">
+  <div style="text-align: center; margin-top: 10px;"><h1 style="font-weight: bold;">PROCEED TO DELETE SUBJECT</h1></div>
+  <div style="display: flex; justify-content: center; margin-top: 30px;">
+    <button id="btn" class="btn btn-primary btn-lg">CANCEL</button>
+    <a th:href="@{/delete_subject(sub=${subId})}" class="btn btn-danger btn-lg" style="margin-left: 20px;">DELETE</a>
+  </div>
+</div>
+<script th:src="@{bootstrap_js.js}"></script>
+<script>
+  document.getElementById("btn").addEventListener("click",function (){
+    window.location.href = document.referrer;
+  })
+</script>
+</body>
+</html>
