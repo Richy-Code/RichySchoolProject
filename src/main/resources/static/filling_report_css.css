@@ -1,0 +1,154 @@
+#main_content{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#sch_info,#term-stu-info,#report-summary{
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+#sch_info img{
+    width: 100px;
+    height: 100px;
+}
+
+#nav-bar{
+    background-color: rgb(24, 57, 26);
+    padding: 10px;
+    height: 50px;
+    width: 100%;
+}
+
+#nav-link{
+    list-style: none;
+    display: flex;
+    padding-left: 5px;
+    justify-content: space-between;
+}
+
+#nav-link a{
+    text-align: center;
+    text-decoration: none;
+    color: white;
+}
+
+#nav-link li:not(:first-child):hover{
+    border: solid 1px rgb(39, 93, 43);
+    background-color: rgb(39, 93, 43);
+    height: 35px;
+    width: 150px;
+    text-align: center;
+    padding-top: 5px;
+    border-radius: 5px;
+}
+
+#nav-link li:hover #nav-link li a{
+    height: 35px;
+    width: 150px;
+}
+
+#section-two{
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.select-one{
+    display: flex;
+}
+.select-one label{
+    padding-top: 10px;
+    padding-right: 10px;
+    font-weight: bold;
+}
+
+.left{
+    text-align: right;
+}
+
+.right{
+    padding-left: 5px;
+}
+
+#tbl, #tbl th, #tbl td {
+    border: 1px solid black;
+}
+
+.center{
+    text-align: center;
+}
+
+#first{
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+#final-section{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+#first div:first-child{
+    padding-right: 100px;
+}
+
+#first div:nth-child(2){
+    padding-right: 150px;
+}
+
+#final{
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+#final .left{
+    padding-right: 50px;
+}
+
+#final table, #final table tr, #final table td{
+    border-bottom: solid 1px black;
+}
+
+.right input{
+    width: 80px;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+#report{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: fit-content;
+    position: relative;
+    align-self: center;
+    margin-top: 5PX;
+}
+
+#btn{
+    margin-left: 80px;
+}
+
+#border{
+    border: 1px solid black;
+    box-sizing: border-box;
+    padding: 10px;
+}

@@ -1,0 +1,49 @@
+#nav-bar{
+    background-color: rgb(24, 57, 26);
+    padding: 10px;
+    height: 50px;
+    width: 100%;
+}
+
+#nav-link{
+    list-style: none;
+    display: flex;
+    padding-left: 5px;
+    justify-content: space-between;
+}
+
+#nav-link a{
+    text-align: center;
+    text-decoration: none;
+    color: white;
+}
+
+#nav-link li:not(:first-child):hover{
+    border: solid 1px rgb(39, 93, 43);
+    background-color: rgb(39, 93, 43);
+    height: 35px;
+    width: 150px;
+    text-align: center;
+    padding-top: 5px;
+    border-radius: 5px;
+}
+
+#second-section{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+#format{
+    text-align: center;
+    text-decoration: underline;
+    font-weight: bold;
+}
+.left{
+    padding-left: 20px;
+    padding-top: 10px;
+}
+
+.right{
+    text-align: right;
+    padding-top: 10px;
+}
