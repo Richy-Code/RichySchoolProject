@@ -61,7 +61,7 @@
                     </div>
                 </div>
                 <div id="row-two">
-                    <table id="link">
+                    <table id="link" style="padding-top: 10px">
                         <tbody>
                             <tr>
                                 <td><h4>STUDENT'S INFORMATION</h4></td>
@@ -69,14 +69,15 @@
                             </tr>
                         </tbody>
                     </table>
-                    <div style="display: grid; border-bottom:solid 3px rgb(225, 225, 225); width: 100%; text-align: left; grid-template-columns: 1fr 1fr;">
+                    <div style="display: grid; border-bottom:solid 3px rgb(225, 225, 225); width: 100%;
+                    text-align: left; grid-template-columns: 1fr 1fr; padding-top: 10px">
                         <div style="padding-left: 10px;"> 
                             <h4 style="color: rgb(173, 188, 205);">Student ID</h4>
                             <h5 style="color: rgb(53, 131, 169);" th:text="${student.getStudent_id()}"></h5>
                         </div>
                         <div style="margin-left: 20px;"> 
                             <h4 style="color: rgb(173, 188, 205);">Guardian Name</h4>
-                            <h5 style="color: rgb(53, 131, 169);" th:text="${student.getGuardian().getGuard_fullName()}"></h5>
+                            <h5 style="color: rgb(53, 131, 169);" th:text="${guardian.getGuard_fullName()}"></h5>
                         </div>
                     </div>
                     <div style="display: grid; border-bottom:solid 3px rgb(225, 225, 225); width: 100%; text-align: left; grid-template-columns: 1fr 1fr;margin-top: 20px;">
@@ -86,7 +87,7 @@
                         </div>
                         <div style="padding-left: 20px;"> 
                             <h4 style="color: rgb(173, 188, 205);">Guardian Contact</h4>
-                            <h5 style="color: rgb(53, 131, 169);" th:text="${student.getGuardian().getGuard_fullName()}"></h5>
+                            <h5 style="color: rgb(53, 131, 169);" th:text="${guardian.getGuard_contact()}"></h5>
                         </div>
                     </div>
                     <div style="display: grid; border-bottom:solid 3px rgb(225, 225, 225); width: 100%;text-align: left; grid-template-columns: 1fr 1fr;margin-top: 20px;">
@@ -96,7 +97,7 @@
                         </div>
                         <div style="padding-left: 20px;"> 
                             <h4 style="color: rgb(173, 188, 205);">RELATIONSHIP</h4>
-                            <h5 style="color: rgb(53, 131, 169);" th:text="${student.getGuardian().getRelationType().getRelationship()}"></h5>
+                            <h5 style="color: rgb(53, 131, 169);" th:text="${guardian.getRelationType().getRelationship()}"></h5>
                         </div>
                     </div>
                 </div>

@@ -22,7 +22,7 @@
         </div>
         <div style="align-self: center; margin-top: 10px">
             <form action="/save_class" th:object="${class}">
-                <input type="hidden" th:value="${class.getParentClass().getClass_department().getDepartmentID()}" th:field="*{parentClass.parentClassId}">
+                <input type="hidden" th:value="${class.getParentClass().getParentClassId()}" th:field="*{parentClass.parentClassId}">
                 <input type="hidden" th:value="${class.getClass_teacher_id().getTeacher_id()}" th:field="*{class_teacher_id.teacher_id}">
                 <table class="table table-bordered" style="width: fit-content;">
                     <thead>

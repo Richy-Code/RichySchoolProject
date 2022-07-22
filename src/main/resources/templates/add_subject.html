@@ -14,7 +14,7 @@
                 $('#tch').empty();
                 $.ajax({
                     type : 'GET',
-                    url : '/department_teachers/' + departmentId,
+                    url : '/possible_teacher/' + departmentId,
                     dataType : 'json',
                     contentType : 'application/json',
                     success : function (result){

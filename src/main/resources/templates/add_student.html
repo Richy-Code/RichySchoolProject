@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" th:href="@{add_teacher.css}">
-
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
     <title>ADD STUDENT</title>
 </head>
 <body>
@@ -23,8 +23,8 @@
         <div id="section-two">
             <div style="text-align: center; width: auto;">
                 <h1 style="font-weight: bold;">NEW STUDENT</h1>
-                <form action="/guardian_form" style="margin-top: 10px;" enctype="multipart/form-data" th:object="${student}">
-                    <input type="hidden" th:value="${student.getStudent_id()}" th:field="*{student_id}">
+                <form action="/guardian_form" method="post" style="margin-top: 10px;" enctype="multipart/form-data" th:object="${student}">
+                    <input type="hidden" th:value="${student.getClasses().getClass_id()}" th:field="*{classes.class_id}">
                     <div style="display: flex;">
                         <div>
                             <table>
@@ -50,17 +50,14 @@
                                     <tr>
                                         <td class="right" style="padding-top: 10px;">CLASS</td>
                                         <td class="left">
-                                            <select name="cls" id="cls" class="form-select" required th:field="*{classes.class_id}">
-                                                <option th:each="clss : ${cls}" th:text="${clss.getClass_name()}"
-                                                 th:value="${clss.getClass_id()}"></option>
-                                            </select>
+                                            <input type="text" name="cls" id="cls" th:value="${student.getClasses().getClass_name()}" readonly class="form-control">
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="right" style="padding-top: 10px;">GENDER</td>
                                         <td style="display: flex; padding-top: 10px; padding-left: 20px;">
-                                            <input type="radio" name="gender" value="M" class="form-check" required><span style="margin-left: 10px;">MALE</span> 
-                                            <input type="radio" name="gender" value="F" class="form-check" style="margin-left: 50px;"><span style="margin-left: 10px;">FEMALE</span> 
+                                            <input type="radio"  th:value="${male}" class="form-check" required th:field="*{gender}"><span style="margin-left: 10px;">MALE</span>
+                                            <input type="radio" th:value="${female}" class="form-check" style="margin-left: 50px;" th:field="*{gender}"><span style="margin-left: 10px;">FEMALE</span>
                                         </td>
                                     </tr>
                                     <tr>

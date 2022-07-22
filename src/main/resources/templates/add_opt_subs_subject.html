@@ -6,6 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" th:href="@{exams_home_page.css}">
     <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <script th:src="@{jquery-3.6.0.js}" type="text/javascript"></script>
+    <script>
+        $(document).ready(function (){
+            $("select").change(function (){
+                let optionSelected = $(this).find('option:selected');
+                let teacherId = optionSelected.val();
+                $("select").not(this).empty()
+                $.ajax({
+                    type : 'GET',
+                    url : '/update_possible_teacher/' + teacherId,
+                    dataType : 'json',
+                    contentType : 'application/json',
+                    success : function (result){
+                        /*<![CDATA[*/
+                        for (let i = 0; i < result.length;i++){
+                            $('select').not(this).append(new Option(result[i].fullName, result[i].teachId))
+                        }
+                        /*]]>*/
+                    }
+                })
+            });
+        });
+    </script>
     <title>SUBJECTS</title>
 </head>
 <body>
@@ -35,7 +58,7 @@
                             <tr>
                                 <td class="right">TEACHER ASSIGNED</td>
                                 <td class="left">
-                                    <select name="tch" id="tch" required class="form-select"
+                                    <select  th:id="'tch'+${item.index}" required class="form-select"
                                             th:field="*{subSubjectList[__${item.index}__].teacher_assigned.teacher_id}">
                                         <option th:each="tchs : ${tch}" th:value="${tchs.getTeacher_id()}"
                                          th:text="${tchs.getFullName()}"></option>

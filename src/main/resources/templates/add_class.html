@@ -12,6 +12,7 @@
             $("#dpt").change(function (){
                 let departmentId = $('option:selected', this).val();
                 $('#tch').empty();
+                $('#text').val($('option:selected',this).text());
                 $.ajax({
                     type : 'GET',
                     url : '/department_teachers/' + departmentId,
@@ -43,14 +44,15 @@
             <div style="text-align: center; width: auto;">
                 <h1 style="font-weight: bold;">NEW CLASS</h1>
                 <form action="/teacher_to_class" style="margin-top: 10px;" th:object="${class}">
+                    <input type="hidden" id="text" th:value="${selectText}" name="parentName">
                     <table>
                         <tbody>
                             <tr>
                                 <td class="right" style="padding-top: 20px;">MAIN CLASS:</td>
                                 <td class="left" style="padding-top: 20px;">
-                                    <select name="dpt" id="dpt" class="form-select" required th:field="*{parentClass.parentClassId}">
+                                    <select name="dpt" id="dpt" class="form-select" required>
                                         <option th:each="parent : ${parentClass}" th:text="${parent.getParentClassName()}"
-                                                th:value="${parent.getParentClassId()}"></option>
+                                                th:value="${parent.getClass_department().getDepartmentID()}"></option>
                                     </select>
                                 </td>
                             </tr>

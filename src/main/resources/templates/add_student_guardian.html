@@ -21,7 +21,7 @@
             <div style="text-align: center; width: auto;">
                 <h1 style="font-weight: bold;">NEW GUARDIAN</h1>
                 <form action="/save_guardian" style="margin-top: 10px;" enctype="multipart/form-data" th:object="${guardian}">
-                    <input type="hidden" name="stu" th:value="${student}">
+                    <input type="hidden" name="student" th:value="${stu.getStudent_id()}">
                     <div style="display: flex;">
                         <div>
                             <table>
@@ -63,8 +63,8 @@
                                     <tr>
                                         <td class="right" style="padding-top: 10px;">GENDER</td>
                                         <td style="display: flex; padding-top: 10px; padding-left: 20px;">
-                                            <input type="radio" name="gender" value="M" class="form-check"><span style="margin-left: 10px;">MALE</span> 
-                                            <input type="radio" name="gender" value="F" class="form-check" style="margin-left: 50px;"><span style="margin-left: 10px;">FEMALE</span> 
+                                            <input type="radio" th:field="*{guard_gender}" th:value="${mal}" class="form-check"><span style="margin-left: 10px;">MALE</span>
+                                            <input type="radio" th:field="*{guard_gender}" th:value="${fem}" class="form-check" style="margin-left: 50px;"><span style="margin-left: 10px;">FEMALE</span>
                                         </td>
                                     </tr>
                                 </tbody>
