@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import com.example.demo.entities.PlainPassword;
 import com.example.demo.entities.Teacher;
+import com.example.demo.entities.Users;
 import com.example.demo.repository.PlainPasswordRepository;
 import com.example.demo.services.service_interface.PlainPasswordInterface;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class PlainPasswordImp implements PlainPasswordInterface {
     }
 
     @Override
-    public PlainPassword findPassword(Teacher teacher) {
-      return   repository.findPlainPasswordByTeacher(teacher);
+    public PlainPassword findPassword(Users users) {
+      return   repository.findPlainPasswordByUsers(users);
     }
 }

@@ -12,6 +12,7 @@
     <div id="main_content">
         <div id="nav-bar">
             <ul id="nav-link">
+                <li><h3 style="color: white">FILL REPORT</h3></li>
                 <li><a th:href="@{/teacher_home_page}">HOME</a></li>
                 <li><a th:href="@{/logout}">LOGOUT</a></li>
             </ul>
@@ -26,10 +27,9 @@
                     <button type="submit" class="btn btn-outline-secondary">Search</button>
                 </form>
             </div>
-            <di><a href="#" class="btn btn-primary">Progress Report</a></di>
         </div>
         <div id="report">
-            <form action="/save_report_details" th:object="${reportDetail}">
+            <form action="/save_report_details" th:object="${report.reportDetails}">
                 <div id="border">
                     <input type="hidden" name="stu" th:value="${report.getStudent().getStudent_id()}">
                     <input type="hidden" name="cls" th:value="${class.getClass_id()}">
@@ -44,7 +44,7 @@
                             <h6>Tel: 0241234567</h6>
                             <h4 style="font-weight: bold;">CODE IS POETRY</h4>
                         </div>
-                        <img src="stu10.png" alt="student_pic" style="margin-left: 30px;">
+                        <img th:src="${report.getStudent().getPhotoImage()}" alt="student_pic" style="margin-left: 30px;">
                     </div>
                     <div>
                         <h4 style="text-align: center; font-weight: bold; text-decoration: underline; margin-top: 10px;">
@@ -72,10 +72,10 @@
                                 </tr>
                                 <tr>
                                     <td class="left">ATTENDANCE :</td>
-                                    <td class="right"><input type="number" name="att" id="attended" min="0" width="30px"
-                                                             required th:field="*{attendance}"> OUT
+                                    <td class="right1"><input type="number" id="attended" min="0"
+                                                 name="attend" th:value="${report.getReportDetails().getAttendance()}"> OUT
                                         <th:block th:object="${commonDetails}">
-                                            <input type="number" id="total" name="tol" min="0" width="30px" required th:field="*{total_attendance}">
+                                            <input type="number" id="total"  name="tol" min="0"  required th:field="*{total_attendance}">
                                         </th:block>
                                          DAYS
                                     </td>
@@ -176,18 +176,17 @@
                                     <tr>
                                         <td class="left">STUDENT'S CONDUCT :</td>
                                         <td>
-                                            <input list="conducts" name="conduct" required th:field="*{attitude}" pattern="^[A-Za-z ]+$"
-                                                   oninvalid="setError(this)"></td>
+                                            <input list="conducts" required th:field="*{attitude}"
+                                                   pattern="^[A-Za-z6 ]+$"></td>
                                     </tr>
                                     <tr>
                                         <td class="left">STUDENT'S INTEREST : </td>
-                                        <td><input type="text" list="interests" name="interest" required pattern="^[A-Za-z ]+$"
-                                                   th:field="*{interest}" oninvalid="setError(this)"></td>
+                                        <td><input type="text" list="interests"  required pattern="^[A-Za-z ]+$" th:field="*{interest}" ></td>
                                     </tr>
                                     <tr>
                                         <td class="left">TEACHER'S REMARKS :</td>
-                                        <td><input type="text" name="teacher_remark" list="teach_rem" required pattern="^[A-Za-z ]+$"
-                                                   th:field="*{teacher_remark}" oninvalid="setError(this)"></td>
+                                        <td><input type="text"  list="teach_rem" required pattern="^[A-Za-z ]+$"
+                                               th:field="*{teacher_remark}"></td>
                                     </tr>
                                     <tr>
                                         <td class="left">HEAD TEACHER'S REMARKS :</td>
@@ -208,11 +207,7 @@
                     </div>
                 </div>
                 <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: 10px;" id="btn">
-                    <div style="padding-right: 200px;"><a th:href="@{/prev_report_filling(trm=${term.getTerm_id()},cls=${class.getClass_id()},
-                    index=${index})}" class="btn btn-primary">PREV</a></div>
                     <div style="padding-right: 200px;"><button class="btn btn-primary" type="submit" id="save">SAVE</button></div>
-                    <div style="padding-right: 200px;"><a th:href="@{/next_report_filling(trm=${term.getTerm_id()},cls=${class.getClass_id()},
-                    index=${index})}" class="btn btn-primary">NEXT</a></div>
                 </div>
             </form>
         </div>
@@ -230,10 +225,5 @@
         <option th:each="rem : ${remarks}" th:value="${rem.getConduct()}"></option>
     </datalist>
     <script th:src="@{bootstrap_js.js}"></script>
-    <script>
-        function  setError(event){
-            event.target.setCustomValidity("field is required");
-        }
-    </script>
 </body>
 </html>

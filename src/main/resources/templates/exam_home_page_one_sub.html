@@ -12,12 +12,14 @@
     <div id="main-content">
         <div id="nav-bar">
             <ul id="nav-link">
+                <li><h3 style="color: white">EXAMS ENTRY</h3></li>
                 <li><a th:href="@{/teacher_home_page}">HOME</a></li>
                 <li><a th:href="@{/logout}">LOGOUT</a></li>
             </ul>
         </div>
         <div id="section-two">
             <div style="text-align: center; width: auto;">
+                <div style="font-weight: bold;text-align: center"><h3>EXAMS ENTRY</h3></div>
                 <form action="/exams_page">
                     <input type="hidden" th:value="${subjects.get(0).getSubject_id()}" name="sub">
                     <table>

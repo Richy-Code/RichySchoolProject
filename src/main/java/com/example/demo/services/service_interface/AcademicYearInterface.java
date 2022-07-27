@@ -14,4 +14,6 @@ public interface AcademicYearInterface {
     List<Academic_Year> passAcademicYear();
 
     Academic_Year findByFirstAndLastYear(String firstYear, String lastYear);
+
+
 }

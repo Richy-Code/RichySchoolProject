@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" th:href="@{view_student_profile.css}">
+  <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+  <title>OPT MAIN SUBJECT PROFILE</title>
+</head>
+<body>
+<div id="nav-bar">
+  <ul id="nav-link">
+    <li><h3 style="color: white;">OPT MAIN SUB PROFILE</h3></li>
+    <li><a th:href="@{/admin}">HOME</a></li>
+    <li><a th:href="@{/logout}">LOGOUT</a></li>
+  </ul>
+</div>
+<div id="student-details">
+  <div id="stu-details">
+    <h3 style="color: rgb(144, 146, 147);"> MAIN SUBJECT DETAILS</h3>
+  </div>
+  <div id="sec-two">
+    <div id="img">
+      <div style="background-color: rgb(220, 230, 230); width: 100%; display: flex; justify-content: center; flex-direction: column; height: 80vh;">
+        <div style="align-self: center; margin-top: 20px;">
+          <h4 style="font-weight: bold;" th:text="${subject.getOpt_sub_name()}"></h4>
+        </div>
+        <div style="align-self: center; margin-top: 20px;">
+          <h6 style="font-weight: bold; color: rgb(53, 131, 169);">
+            OPT MAIN SUBJECT</h6>
+        </div>
+        <div style="align-self: center; margin-top: 20px;">
+          <h6 style="font-weight: bold; color: rgb(53, 131, 169);" th:text="${subject.getDepartment_subject().getDepartment_name()}"></h6>
+        </div>
+        <div style="align-self: center; margin-top: 20px;">
+            <a th:href="@{/edit_opt_main(sub=${subject.getOpt_sub_id()})}" class="btn btn-dark btn-lg">Edit Details</a>
+        </div>
+      </div>
+    </div>
+    <div id="info">
+      <div id="row-one" style="width: 100%">
+        <div style="background-color: rgb(16, 196, 165); width: 100%;">
+          <div style="text-align: center; color: white;">
+            <h4 style="padding-top: 10px;">OPT MAIN SUB ID</h4>
+            <h1 th:text="${subject.getOpt_sub_id()}"></h1>
+          </div>
+        </div>
+        <div style="background-color: rgb(81, 147, 207); width: 100%;" >
+          <div style="text-align: center; color: white;">
+            <h4 style="padding-top: 10px;">NO. OF SUB SUBJECTS</h4>
+            <h1 th:text="${subject.getSubjectsSet().size()}"></h1>
+          </div>
+        </div>
+      </div>
+      <div id="row-two" style="height: 100%; display: flex; justify-content: center; width: 100%; margin-top: 10px">
+        <div style="width: 100%; height: 100%; align-self: center">
+          <div>
+            <table class="table table-striped" style="width: 100%;">
+              <thead style="text-align: center;">
+              <tr>
+                <th>SUBJECT NAME</th>
+                <th>SUBJECT ID</th>
+                <th>TEACHER ASSIGN</th>
+                <th>NO. OF STUDENTS</th>
+              </tr>
+              </thead>
+              <tbody style="text-align: center;">
+              <tr th:each="sub : ${subject.getSubjectsSet()}">
+                <td th:text="${sub.getSubject_name()}"></td>
+                <td th:text="${sub.getSubject_id()}"></td>
+                <td th:text="${sub.getTeacher_assigned().getStaffFullName()}"></td>
+                <td th:text="${sub.getStudentSet().size()}"></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

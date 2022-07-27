@@ -1,5 +1,6 @@
 package com.example.demo.services.service_interface;
 
+import com.example.demo.binding_entities.SummaryReport;
 import com.example.demo.entities.*;
 
 import java.util.List;
@@ -25,4 +26,8 @@ public interface ExamsScoreInterface {
     List<ExamsScore> examsScoreByStudentAndSubject(Student student,Subjects subjects);
 
     List<ExamsScore> examsScoreByStudentAndSubjectFromRecordExams(Student student,Subjects subjects);
+
+    List<SummaryReport> summaryReport(String studentId, Department department);
+
+    List<SummaryReport> summaryReportFromRecordTable(String studentId, Department department);
 }

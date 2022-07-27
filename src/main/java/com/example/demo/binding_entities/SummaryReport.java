@@ -4,15 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-import java.util.Map;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProgressReport {
+public class SummaryReport {
+    private String subjectName;
+    private String className;
 
-    private List<String> categories;
-
-    private Map<String,List<Double>> graphData;
+    private String termName;
+    private double marks;
 }

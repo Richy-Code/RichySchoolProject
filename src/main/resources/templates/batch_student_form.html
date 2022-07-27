@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{exams_home_page.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>ADD STUDENTS</title>
+</head>
+<body>
+<div id="main-content">
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><h3 style="color: white">ADD STUDENTS</h3></li>
+            <li><a th:href="@{/teacher_home_page}">HOME</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    <div style="text-align: center;margin-top: 10px; text-decoration: underline; font-weight: bold">
+        <h4>ALL STUDENT WOULD BE PLACED IN SELECTED CLASS</h4>
+    </div>
+    <div id="section-two">
+        <div style="font-weight: bold;text-align: center"><h3>UPLOAD FILE</h3></div>
+        <div style="text-align: center; width: auto;">
+            <form action="/save_batch_students" method="post" enctype="multipart/form-data">
+                <table>
+                    <tbody>
+                    <tr>
+                        <td class="right">UPLOAD TEXT FILE</td>
+                        <td class="left">
+                            <select name="clsId" required class="form-select">
+                                <option th:each="clss : ${cls}" th:value="${clss.getClass_id()}"
+                                th:text="${clss.getClass_name()}"></option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="right">UPLOAD TEXT FILE</td>
+                        <td class="left">  <input type="file" class="form-control" accept=".txt" name="file"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <input type="submit" value="SUBMIT" class="btn btn-primary btn-lg" style="margin-top: 30px;">
+            </form>
+        </div>
+    </div>
+</div>
+<script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

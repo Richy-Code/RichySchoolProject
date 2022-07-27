@@ -7,28 +7,6 @@
     <link rel="stylesheet" th:href="@{exams_home_page.css}">
     <link rel="stylesheet" th:href="@{bootstrap_css.css}">
     <script th:src="@{jquery-3.6.0.js}" type="text/javascript"></script>
-    <script>
-        $(document).ready(function (){
-            $("select").change(function (){
-                let optionSelected = $(this).find('option:selected');
-                let teacherId = optionSelected.val();
-                $("select").not(this).empty()
-                $.ajax({
-                    type : 'GET',
-                    url : '/update_possible_teacher/' + teacherId,
-                    dataType : 'json',
-                    contentType : 'application/json',
-                    success : function (result){
-                        /*<![CDATA[*/
-                        for (let i = 0; i < result.length;i++){
-                            $('select').not(this).append(new Option(result[i].fullName, result[i].teachId))
-                        }
-                        /*]]>*/
-                    }
-                })
-            });
-        });
-    </script>
     <title>SUBJECTS</title>
 </head>
 <body>
@@ -51,7 +29,7 @@
                             <tr>
                                 <td class="right">SUBJECT NAME</td>
                                 <td class="left">
-                                    <input type="text" class="form-control" required
+                                    <input type="text" class="form-control" required autocapitalize="characters"
                                            th:field="*{subSubjectList[__${item.index}__].subject_name}">
                                 </td>
                             </tr>

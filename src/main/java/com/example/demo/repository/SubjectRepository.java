@@ -22,6 +22,8 @@ public interface SubjectRepository extends CrudRepository<Subjects,Long> {
     @Query("SELECT S.subject_name FROM Subjects S WHERE S.teacher_assigned = :teacher_id")
     List<String> teacherSubjectName(@Param("teacher_id") Teacher teacher);
 
-    @Query("SELECT sub FROM Subjects sub WHERE sub.options = :opt AND sub.department_subject = :dpt")
-    List<Subjects> findByOptions(@Param("opt")SubjectOptions options,@Param("dpt") Department department);
+    @Query("SELECT sub FROM Subjects sub WHERE sub.options = :opt AND sub.department_subject = :dpt " +
+            "AND sub.subject_Status = :status")
+    List<Subjects> findByOptions(@Param("opt")SubjectOptions options,@Param("dpt") Department department,
+                                 @Param("status")Student_Status status);
 }

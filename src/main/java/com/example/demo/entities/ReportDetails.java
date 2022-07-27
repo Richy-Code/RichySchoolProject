@@ -17,14 +17,14 @@ public class ReportDetails {
     @Column(nullable = false)
     private int attendance;
     @Column(nullable = false)
-    private String interest = " ";
+    private String interest = "";
     @Column(nullable = false)
-    private String attitude = " ";
+    private String attitude = "";
     @Column(nullable = false)
-    private String head_remarks = " ";
+    private String head_remarks = "";
     @Column(nullable = false)
-    private String teacher_remark = " ";
-    private String promo_repeated_class = " ";
+    private String teacher_remark = "";
+    private String promo_repeated_class = "";
 
     private String position_in_class = "";
     @ManyToOne(

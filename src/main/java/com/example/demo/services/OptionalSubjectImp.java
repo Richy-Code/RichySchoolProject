@@ -41,4 +41,9 @@ public class OptionalSubjectImp implements OptionalSubjectInterface {
     public OptionalSubject findMainOptSubject(Long subject) {
         return repository.findMainOptSubject(subject);
     }
+
+    @Override
+    public void deleteOptionalSubjects(OptionalSubject subject) {
+        repository.delete(subject);
+    }
 }

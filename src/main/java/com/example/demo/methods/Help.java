@@ -5,6 +5,7 @@ import com.example.demo.binding_entities.ErrorMessage;
 import com.example.demo.binding_entities.ExamsEntry;
 import com.example.demo.binding_entities.PromotionResults;
 import com.example.demo.entities.*;
+import com.example.demo.enum_entities.CoreSubject;
 import com.example.demo.enum_entities.Gender;
 import com.example.demo.enum_entities.Status;
 import com.example.demo.enum_entities.Student_Status;
@@ -140,23 +141,32 @@ public class Help {
        }
    }
 
-   public static void aggregateScore(List<Report> reportList){
+   public static void aggregateScore(List<Report> reportList,SubjectInterface subjectInterface){
         int aggregate = 0;
         List<Integer> best = new ArrayList<>();
+        List<Subjects> subjectsList = subjectInterface.subjectByDepartment(
+                reportList.get(0).getStudent().getClasses().getParentClass().getClass_department(),
+                Student_Status.ACTIVE);
+        List<Subjects> coreSubject = new ArrayList<>();
+        subjectsList.forEach(subjects -> {
+            if (subjects.getCoreSubject().equals(CoreSubject.YES)){
+                coreSubject.add(subjects);
+            }
+        });
         for (Report report : reportList){
             for (SubjectReportSummary summary : report.getSummaryList()){
-                Optional<String> grade = Optional.ofNullable(summary.getGrade());
-                if(summary.getSubject_name().equals("ENGLISH")||summary.getSubject_name().equals("MATHEMATICS") ||
-                        summary.getSubject_name().equals("SOCIAL") || summary.getSubject_name().equals("SCIENCE")
-                ){
-                    aggregate += Integer.parseInt(grade.orElse("0"));
-                }else {
-                    //System.out.println("hello");
-                    best.add(Integer.parseInt(grade.orElse("0")));
+                for (Subjects core : coreSubject){
+                    if (core.getCoreSubject().equals(CoreSubject.YES) &&
+                    core.shotSubjectName().equals(summary.getSubject_name())){
+                        Optional<String> grade = Optional.ofNullable(summary.getGrade());
+                        aggregate += Integer.parseInt(grade.orElse("0"));
+                    }else {
+                        best.add(Integer.parseInt(summary.getGrade()));
+                    }
                 }
             }
             best.sort(Comparator.comparingInt(value -> value));
-            aggregate += best.get(best.size()-1) + best.get(best.size()-2);
+            aggregate += best.get(0) + best.get(1);
             report.setAggregate(aggregate);
             best = new ArrayList<>();
             aggregate = 0;
@@ -219,17 +229,14 @@ public class Help {
        }
     }
 
-    public static String encryptedPassword(String password){
-
-        return new BCryptPasswordEncoder().encode(password);
-    }
-
     public static Users user(Teacher teacher,Set<Roles> rolesSet){
+        Random random = new Random();
+        String suffix = String.format("%03d",random.nextInt(101));
         Users users = new Users();
         users.setPlainPassword(passwordGenerator());
-        users.setPassword(encryptedPassword(users.getPlainPassword()));
+        users.setPassword(users.getPlainPassword());
         users.setRoles(rolesSet);
-        users.setUser_name(teacher.getFirst_name() + teacher.getTeacher_id());
+        users.setUser_name(teacher.getFirst_name() + suffix);
         return users;
     }
     public static String passwordGenerator(){
@@ -248,7 +255,7 @@ public class Help {
         return password.toString();
     }
 
-    public static void saveFile(String uploadDir, String fileName, MultipartFile multipartFile)  {
+    public static  void saveFile(String uploadDir, String fileName, MultipartFile multipartFile)  {
         Path uploadPath = Paths.get(uploadDir);
         try {
             if(!Files.exists(uploadPath)){
@@ -267,49 +274,112 @@ public class Help {
 
     }
 
-    public static void readFile(MultipartFile file,StudentInterface studentInterface,
-                                ClassesInterface classesInterface,String classId) throws AppExceptions {
+    public static List<Integer>  readFile(MultipartFile file,StudentInterface studentInterface,String classId,
+                                RelationshipTypeInterface typeInterface, GuardianInterface guardianInterface,
+                                ClassesInterface classesInterface) throws AppExceptions {
+        List<Integer> index = new ArrayList<>();
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))){
-            String line;
-            String [] data;
-            List<Student> studentList = new ArrayList<>();
+            String line = "";
+            String [] data ;
             Classes classes = classesInterface.findClassById(classId);
+            int unsupportedData = 0;
+            List<RelationType> relationTypes = typeInterface.findAllTypes();
             while ((line = reader.readLine()) !=null){
-                Student student = new Student();
                 data = line.split(" ");
-                if (data.length == 4){
-                    student.setFirst_name(data[0]);
-                    student.setMiddle_name(data[1]);
-                    student.setLast_name(data[2]);
-                    if (data[3].equalsIgnoreCase("M"))
-                        student.setGender(Gender.MALE);
-                    else
-                        student.setGender(Gender.FEMALE);
-                }else {
-                    student.setFirst_name(data[0]);
-                    student.setMiddle_name(" ");
-                    student.setLast_name(data[1]);
-                    if (data[2].equalsIgnoreCase("M"))
-                        student.setGender(Gender.MALE);
-                    else
-                        student.setGender(Gender.FEMALE);
+                switch (data.length){
+                    case 4 ->{
+                        Gender gender = (data[3].equalsIgnoreCase("m")) ? Gender.MALE : Gender.FEMALE;
+                        Student student = new Student(data[0],data[1],data[2],classes,gender,Student_Status.ACTIVE);
+                        studentInterface.saveStudent(student);
+                    }
+                    case 3 ->{
+                        Gender gender = (data[2].equalsIgnoreCase("m")) ? Gender.MALE : Gender.FEMALE;
+                        Student student = new Student(data[0],"",data[1],classes,gender,Student_Status.ACTIVE);
+                        studentInterface.saveStudent(student);
+                    }
+                    case 10 ->{
+                        Gender gender = (data[3].equalsIgnoreCase("m")) ? Gender.MALE : Gender.FEMALE;
+                        Gender guardGender = (data[8].equalsIgnoreCase("m"))?Gender.MALE : Gender.FEMALE;
+                        Student student = new Student(data[0],data[1],data[2],classes,gender,Student_Status.ACTIVE);
+                        studentInterface.saveStudent(student);
+                        Guardian guardian = new Guardian(data[4],data[5],data[6],data[7],guardGender,relationType(
+                                data[8],relationTypes),student);
+                        guardianInterface.saveGuardian(guardian);
+                    }
+                    case 8 ->{
+                        Gender gender = (data[2].equalsIgnoreCase("m")) ? Gender.MALE : Gender.FEMALE;
+                        Student student = new Student(data[0],"",data[1],classes,gender,Student_Status.ACTIVE);
+                        studentInterface.saveStudent(student);
+                        Gender guardGender = (data[6].equalsIgnoreCase("m"))?Gender.MALE : Gender.FEMALE;
+                        Guardian guardian = new Guardian(data[3],"",data[4],data[5],guardGender, relationType(
+                                data[7],relationTypes), student);
+                        guardianInterface.saveGuardian(guardian);
+                    }
+                    case 9 ->{
+                        if (data[3].equalsIgnoreCase("m") || data[3].equalsIgnoreCase("f")){
+                            Gender gender = (data[3].equalsIgnoreCase("m")) ? Gender.MALE : Gender.FEMALE;
+                            Student student = new Student(data[0],data[1],data[2],classes,gender,Student_Status.ACTIVE);
+                            studentInterface.saveStudent(student);
+                            Gender guardGender = (data[7].equalsIgnoreCase("m"))?Gender.MALE : Gender.FEMALE;
+                            Guardian guardian = new Guardian(data[4],"",data[5],data[6],guardGender, relationType(
+                                    data[8],relationTypes), student);
+                            guardianInterface.saveGuardian(guardian);
+                        }else {
+                            Gender gender = (data[2].equalsIgnoreCase("m")) ? Gender.MALE : Gender.FEMALE;
+                            Student student = new Student(data[0],"",data[1],classes,gender,Student_Status.ACTIVE);
+                            studentInterface.saveStudent(student);
+                            Gender guardGender = (data[7].equalsIgnoreCase("m"))?Gender.MALE : Gender.FEMALE;
+                            Guardian guardian = new Guardian(data[3],data[4],data[5],data[6],guardGender, relationType(
+                                    data[8],relationTypes), student);
+                            guardianInterface.saveGuardian(guardian);
+                        }
+                    }
+                    default -> {
+                        unsupportedData ++;
+                        index.add(unsupportedData);
+                    }
                 }
-                student.setClasses(classes);
-                student.setStudent_status(Student_Status.ACTIVE);
-                studentList.add(student);
             }
-            studentInterface.saveAllStudents(studentList);
         }catch (IOException e){
             throw new NoPassRecordFoundException
                     (new ErrorMessage(HttpStatus.CONFLICT,"COULD NOT READ FROM FILE"));
         }
+        return index;
     }
 
+    private static RelationType relationType(String shortName,List<RelationType> types){
+        RelationType relation = new RelationType();
+        switch (shortName){
+            case "p","P" ->{
+                for (RelationType relationType : types){
+                    if (relationType.getRelationship().equalsIgnoreCase("parent")){
+                        relation = relationType;
+                    }
+                }
+            }
+            case "f","F" ->{
+                for (RelationType relationType : types){
+                    if (relationType.getRelationship().equalsIgnoreCase("family")){
+                       relation = relationType;
+                    }
+                }
+            }
+            default -> {
+                for (RelationType relationType : types){
+                    if (relationType.getRelationship().equalsIgnoreCase("guardian")){
+                       relation = relationType;
+                    }
+                }
+            }
+        }
+        return  relation;
+    }
     public static List<PromotionResults> promotion(ClassesInterface classesInterface, int passMark, int trialMark, int choice,
                                                    StudentInterface studentInterface, ExamsScoreInterface scoreInterface,
                                                    SBAInterface sbaInterface, ReportDetailInterface detailInterface,
                                                    DepartmentHead head, TermInterface termInterface, ParentClassInterface
-                                 parentClassInterface){
+                                 parentClassInterface,YearCompletedInterface yearCompletedInterface,
+                                                   AcademicYearInterface academicYearInterface){
         List<Classes> classesList = classesInterface.listClassByDepartmentHead(head);
         List<Student> studentList = new ArrayList<>();
         List<PromotionResults> resultsList = new ArrayList<>();
@@ -326,7 +396,16 @@ public class Help {
             }
         }
         for (Classes classes : classesList){
-            if (classes.getClass_name().contains("jhs three")){
+            if (classes.getParentClass().getParentClassId() == 9){
+                Academic_Year academic_year = academicYearInterface.findAcademicYearByMaxId(Status.CURRENT);
+                List<StudentCompletedYear> yearList = new ArrayList<>();
+                studentList.addAll(studentInterface.studentsByClass(Student_Status.ACTIVE,classes));
+                studentList.forEach(student -> {
+                    student.setStudent_status(Student_Status.COMPLETED);
+                    studentInterface.saveStudent(student);
+                    yearList.add(new StudentCompletedYear(student,academic_year));
+                });
+                yearCompletedInterface.saveStudentCompletedYear(yearList);
                 continue;
             }
             Classes nextClass = nextClass(classes,parentClassInterface,classesInterface);
@@ -405,6 +484,7 @@ public class Help {
             passStudents = 0;
             onTrialStudent = 0;
             failStudent = 0;
+            studentList = new ArrayList<>();
         }
         return resultsList;
     }
@@ -453,19 +533,10 @@ public class Help {
                                                TeacherInterface teacherInterface){
         List<Classes> classesList = classesInterface.findClassByDepartment(department);
         List<Teacher> teacherList = teacherInterface.teacherByDepartment(department,Student_Status.ACTIVE);
-        List<Teacher> results = new ArrayList<>();
-        boolean found = false;
-        for (Teacher teacher : teacherList){
-            for (Classes classes : classesList){
-                if (classes.getClass_teacher_id().equals(teacher)){
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-                results.add(teacher);
+        for (Classes classes : classesList){
+            teacherList.remove(classes.getClass_teacher_id());
         }
-        return results;
+        return teacherList;
     }
 
     public static void recordInput(ExamsScoreInterface examsScoreInterface,SBAInterface sbaInterface,

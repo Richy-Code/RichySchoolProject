@@ -35,13 +35,15 @@ public class PlainPassword {
     )
     @JoinColumn(
             name = "user_id",
-            referencedColumnName = "teacher_id"
+            referencedColumnName = "user_id"
     )
 
-    private Teacher teacher;
+    private Users users;
 
-    public PlainPassword(String password, Teacher teacher) {
+    public PlainPassword(String password, Users users) {
         this.password = password;
-        this.teacher = teacher;
+        this.users = users;
     }
+
+
 }

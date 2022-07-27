@@ -19,17 +19,18 @@
 <body>
 <div id="nav-bar">
   <ul id="nav-link">
+    <li><h3 style="color: white">EXAMS ENTRY</h3></li>
     <li><a th:href="@{/teacher_home_page}">HOME</a></li>
     <li><a th:href="@{/sba_page(trm=${term.getTerm_id()},cls=${class.getClass_id()}
             ,sub=${subject.getSubject_id()})}">SBA ENTRY</a></li>
+    <li><a th:href="@{/report_filling(cls=${class_id},trm=${term.getTerm_id()})}">FILL REPORT</a></li>
     <li><a th:href="@{/terminal_report(trm=${term.getTerm_id()},cls=${class.getClass_id()}
             ,sub=${subject.getSubject_id()})}">REPORT</a></li>
     <li><a th:href="@{/logout}">LOGOUT</a></li>
   </ul>
 </div>
 <h1 id="subject-title" th:text="${subject.getSubject_name()}"></h1>
-<h3>EXAMINATION ENTRY</h3>
-<div id="fill"><a th:href="@{report_filling(cls=${class_id},trm=${term.getTerm_id()})}" class="btn btn-primary">FILL REPORT</a></div>
+<h5>EXAMINATION ENTRY</h5>
 <div id="section-two">
   <div class="select-one">
     <h1 th:text="${class.getClass_name()}"></h1>

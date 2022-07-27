@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{exams_home_page.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>EDIT OPTIONAL SUBJECT</title>
+</head>
+<body>
+<div id="main-content">
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><h3 style="color: white;">EDIT OPT SUBJECT</h3></li>
+            <li><a th:href="@{/admin}">HOME</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    <div id="section-two">
+        <div style="text-align: center; width: auto;">
+            <h1 style="font-weight: bold;">EDIT OPTIONAL SUBJECT</h1>
+            <form action="/edit_sub_subjects" style="margin-top: 10px;" th:object="${subject}">
+                <input type="hidden" th:value="${subject.getOpt_sub_id()}" th:field="*{opt_sub_id}">
+                <table>
+                    <tbody>
+                    <tr>
+                        <td class="right">MAIN SUBJECT NAME</td>
+                        <td class="left">
+                            <input type="text" class="form-control" required th:field="*{opt_sub_name}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="right" style="padding-top: 20px;">DEPARTMENT</td>
+                        <td class="left"><input type="text" class="form-control" th:value="${subject.getDepartment_subject().getDepartment_name()}" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="right">NUMBER OF SUB SUBJECTS</td>
+                        <td class="left">
+                            <input type="number" class="form-control" required min="2" name="num"
+                            th:value="${subject.getSubjectsSet().size()}">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <input type="submit" value="NEXT" class="btn btn-primary btn-lg" style="margin-top: 30px;">
+            </form>
+        </div>
+    </div>
+</div>
+<script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

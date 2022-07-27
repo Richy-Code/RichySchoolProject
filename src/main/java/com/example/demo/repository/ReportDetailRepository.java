@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,7 +18,9 @@ public interface ReportDetailRepository extends CrudRepository<ReportDetails, Re
     List<ReportDetails>findDetailsByStudentId(@Param("student_id")Student student_id);
 
     @Modifying(clearAutomatically = true)
+    @Transactional
     @Query("UPDATE ReportDetails rd SET rd.head_remarks = :remark WHERE rd.reportDetailsId = :id")
     void updateHeadRemark(@Param("remark")String remark,@Param("id")ReportDetailsId detailsId);
+
 
 }

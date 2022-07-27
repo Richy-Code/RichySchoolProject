@@ -13,6 +13,18 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Entity
 public class Guardian {
+    public Guardian(String guard_first_name, String guard_middle_name,
+                    String guard_last_name, String guard_contact,
+                    Gender guard_gender, RelationType relationType, Student student) {
+        this.guard_first_name = guard_first_name;
+        this.guard_middle_name = guard_middle_name;
+        this.guard_last_name = guard_last_name;
+        this.guard_contact = guard_contact;
+        this.guard_gender = guard_gender;
+        this.relationType = relationType;
+        this.student = student;
+    }
+
     @Id
     @SequenceGenerator(
             name = "guardian_sequence",

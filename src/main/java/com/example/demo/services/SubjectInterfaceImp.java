@@ -59,7 +59,8 @@ public class SubjectInterfaceImp implements SubjectInterface {
     }
 
     @Override
-    public List<Subjects> subjectByOptionAndDepartment(SubjectOptions options, Department department) {
-        return subjectRepository.findByOptions(options,department);
+    public List<Subjects> subjectByOptionAndDepartment(SubjectOptions options, Department department,
+                                                       Student_Status status) {
+        return subjectRepository.findByOptions(options,department,status);
     }
 }

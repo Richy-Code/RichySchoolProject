@@ -2,10 +2,7 @@ package com.example.demo.controllers;
 
 import com.example.demo.binding_entities.*;
 import com.example.demo.entities.*;
-import com.example.demo.enum_entities.Gender;
-import com.example.demo.enum_entities.Status;
-import com.example.demo.enum_entities.Student_Status;
-import com.example.demo.enum_entities.SubjectOptions;
+import com.example.demo.enum_entities.*;
 import com.example.demo.error.AppExceptions;
 import com.example.demo.error.NoPassRecordFoundException;
 import com.example.demo.methods.Help;
@@ -66,9 +63,12 @@ public class Control {
 
     private final SbaRecordInterface sbaRecordInterface;
 
+    private final YearCompletedInterface yearCompletedInterface;
     private final GuardianInterface guardianInterface;
     private final List<Report> reportList = new ArrayList<>();
     private final List<Report> passReportList = new ArrayList<>();
+
+    private final List<CommonReportDetails> detailsList = new ArrayList<>();
     public Control(UserServiceInterface userServiceInterface, SubjectInterface subjectInterface,
                    StudentInterface studentInterface, ClassesInterface classesInterface,
                    TermInterface termInterface, SBAInterface sbaInterface,
@@ -87,6 +87,7 @@ public class Control {
                    RelationshipTypeInterface relationshipTypeInterface,
                    RecordExamsInterface recordExamsInterface,
                    SbaRecordInterface sbaRecordInterface,
+                   YearCompletedInterface yearCompletedInterface,
                    GuardianInterface guardianInterface) {
         this.userServiceInterface = userServiceInterface;
         this.subjectInterface = subjectInterface;
@@ -113,9 +114,10 @@ public class Control {
         this.relationshipTypeInterface = relationshipTypeInterface;
         this.recordExamsInterface = recordExamsInterface;
         this.sbaRecordInterface = sbaRecordInterface;
+        this.yearCompletedInterface = yearCompletedInterface;
         this.guardianInterface = guardianInterface;
     }
-    @RequestMapping("/Richy")
+    @RequestMapping("/")
     public String insertData(){
         departmentInterface.saveAllDepartment(Help.departmentList());
         termInterface.saveAllTerm(Help.termList());
@@ -189,6 +191,7 @@ public class Control {
 
     @RequestMapping(value = "/admin_terminal_report")
     public String adminTerminalReport(HttpServletRequest request, Model model){
+        reportList.clear();
         Classes classes = classesInterface.findClassById(request.getParameter("cls"));
         Term term = termInterface.findTermById(Long.parseLong(request.getParameter("trm")));
         Academic_Year year = academicYearInterface.findAcademicYearByMaxId(Status.CURRENT);
@@ -211,11 +214,11 @@ public class Control {
                 summary = new SubjectReportSummary();
                 report = new Report();
                 if (subjects1.getOptions().equals(SubjectOptions.OPTIONAL) && subjects1.getStudentSet().contains(student1)) {
-                    summary.setSubject_name(subjects1.getSubject_name());
+                    summary.setSubject_name(subjects1.shotSubjectName());
                 }else if (subjects1.getOptions().equals(SubjectOptions.OPTIONAL) && ! subjects1.getStudentSet().contains(student1)){
                     continue;
                 }else {
-                    summary.setSubject_name(subjects1.getSubject_name());
+                    summary.setSubject_name(subjects1.shotSubjectName());
                 }
                 summaryList.add(summary);
             }
@@ -261,21 +264,20 @@ public class Control {
                 }
             }
         }
-        for (Report report1 : reportList){
+        lab:for (Report report1 : reportList){
             for (ReportDetails details : reportDetails){
-                if(report1.getStudent().equals(details.getReportDetailsId().getStudent_id())){
+                if (report1.getStudent().equals(details.getReportDetailsId().getStudent_id())){
                     report1.setReportDetails(details);
-                    break;
+                    continue lab;
                 }
             }
             report1.setReportDetails(new ReportDetails());
-
         }
         Help.findPositionInClass(reportList);
-        Help.aggregateScore(reportList);
-        int index = 0;
-        report = reportList.get(index);
-        setModels(model,report,classes,term,index+1);
+        Help.aggregateScore(reportList,subjectInterface);
+        report = reportList.get(0);
+        System.out.println(report.getReportDetails().getHead_remarks());
+        setModels(model,report,classes,term,0);
         return "head_filling_report";
     }
 
@@ -285,7 +287,6 @@ public class Control {
         SBAConfig sbaConfig = sbaConfigInterface.findSBAConfig(classes.getParentClass().getClass_department(), year,Status.CURRENT);
         sbaConfig = (sbaConfig != null) ? sbaConfig : new SBAConfig();
         common = (common != null) ? common : new CommonReportDetails();
-        ReportDetails details = new ReportDetails();
         model.addAttribute("report",report);
         model.addAttribute("class",classes);
         model.addAttribute("academic_year",year);
@@ -296,50 +297,44 @@ public class Control {
         model.addAttribute("conduct", conductInterface.findAllConducts());
         model.addAttribute("remarks",remarksInterface.allRemarks());
         model.addAttribute("interest", interestInterface.findAllInterest());
-        model.addAttribute("reportDetail", details);
         model.addAttribute("num_on_roll",reportList.size());
     }
 
     @RequestMapping(value = "/save_head_filling_report")
-    public String saveHeadFillingReport(@ModelAttribute("reportDetail") ReportDetails details,
+    public String saveHeadFillingReport(@ModelAttribute("reportDetail")Report details,
                                         @RequestParam("cls")String classId,@RequestParam("trm") Long termId,
                                         @RequestParam("idx")Integer index,@RequestParam("stuId")String studId){
         Classes classes = classesInterface.findClassById(classId);
         Term term = termInterface.findTermById(termId);
         Student student = studentInterface.findStudentById(studId);
         ReportDetailsId detailsId = new ReportDetailsId(student,classes,term);
-        reportDetailInterface.updateHeadRemarks(details.getHead_remarks(),detailsId);
-        return "redirect:/head_next_report?cls="+classes+"trm="+term+"idx="+index;
+        reportDetailInterface.updateHeadRemarks(details.getReportDetails().getHead_remarks(),detailsId);
+        reportList.get(index).setReportDetails(reportDetailInterface.findDetailsById(new ReportDetailsId(
+                student,classes,term)));
+        return "redirect:/printRecord?cls="+classes.getClass_id()+"&trm="+term.getTerm_id()+"&index="+index;
     }
-
-    @RequestMapping(value = "/head_prev_report")
-    public String headPrevReport(@RequestParam("cls") String class_id,@RequestParam("trm")
-    Long term_id, @RequestParam("index") Integer index,Model model) throws AppExceptions{
+    @RequestMapping(value = "/printRecord")
+    public String printReport(@RequestParam("cls") String class_id,@RequestParam("trm")
+    Long term_id, @RequestParam("index") Integer index,Model model){
         Classes classes = classesInterface.findClassById(class_id);
         Term term = termInterface.findTermById(term_id);
-        Report report;
-        if (index <= 0){
-            String message = "END OF STUDENT RECORD IN "+ classes.getClass_name();
-            throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.OK,message));
-        }else
-            report = reportList.get(--index);
+        Report report = reportList.get(index);
         setModels(model,report,classes,term,index);
-        return "head_filling_report";
+        return "printReport";
     }
 
     @RequestMapping(value = "/head_next_report")
     public String headNextReport(@RequestParam("cls") String class_id,@RequestParam("trm")
-    Long term_id, @RequestParam("index") Integer index,Model model) throws AppExceptions{
+    Long term_id, @RequestParam("index") Integer index,Model model){
         Classes classes = classesInterface.findClassById(class_id);
         Term term = termInterface.findTermById(term_id);
-        Report report ;
+        Report report = new Report() ;
         if (index > reportList.size()-1){
-            String message = "END OF STUDENT RECORD IN "+ classes.getClass_name();
-            throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.OK,message));
+            return "redirect:/term_report_form";
         }else {
-            report = reportList.get(index);
+            report = reportList.get(++index);
         }
-        setModels(model,report,classes,term,++index);
+        setModels(model,report,classes,term,index);
         return "head_filling_report";
     }
 
@@ -371,105 +366,87 @@ public class Control {
         return "head_filling_report";
     }
 
-    @RequestMapping(value = "/head_passed_record/{student_id}")
-    public String passedRecord(@PathVariable(value = "student_id") String student_id, Model model) throws AppExceptions {
+    @RequestMapping(value = "/head_passed_record")
+    public String passedRecord(@RequestParam("student_id") String student_id, Model model) throws AppExceptions {
+        passReportList.clear();
+        detailsList.clear();
         Student student = studentInterface.findStudentById(student_id);
-        List<ExamsScore> scoreFromExamsScore;
-        List<ExamsScore> scoreFromRecordExamsScore = examsScoreInterface.examsScoreByStudentIdFromRecordExams(student,
+        List<ExamsScore> scoreFromExams = examsScoreInterface.examsScoreByStudentIdFromExams(student,
+                student.getClasses().getParentClass().getClass_department());;
+        List<ExamsScore> scoreFromRecordTable = examsScoreInterface.examsScoreByStudentIdFromRecordExams(student,
                 student.getClasses().getParentClass().getClass_department());
-        List<SBA> sbaFromSBA;
-        List<SBA> sbaFromRecordSBA = sbaInterface.sbaByStudentIdFromRecordSBA(student,
+        List<SBA> sbaListFromRecordTable = sbaInterface.sbaByStudentIdFromRecordSBA(student,
+                student.getClasses().getParentClass().getClass_department());
+        List<SBA> sbaListFromSBA = sbaInterface.sbaByStudentIdFromSBA(student,
                 student.getClasses().getParentClass().getClass_department());
         List<ReportDetails> details = reportDetailInterface.detailsByStudentId(student);
-        CommonReportDetails commonReportDetails = new CommonReportDetails();
-        List<SubjectReportSummary> summaryList = new ArrayList<>();
-        List<TempSubjectSummary> subjectSummaries = new ArrayList<>();
-        SubjectReportSummary summary;
+        Map<DummyClass,List<SubjectReportSummary>> listMap = new HashMap<>();
         SBAConfig sbaConfig = new SBAConfig();
-        Report report;
-        double totalScore = 0;
-        ReportDetails details1 = new ReportDetails();
-        if (student.getStudent_status().equals(Student_Status.COMPLETED) && scoreFromRecordExamsScore.isEmpty()){
-            String message =
-                    """
-                    STUDENT HAS NO PASSED RECORD
-                    """;
-            throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.NOT_FOUND,message));
+        List<TempSubjectSummary> subjectSummaries = new ArrayList<>();
+        if (scoreFromExams.isEmpty() && scoreFromRecordTable.isEmpty()){
+            throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.NOT_FOUND,
+                    "NO RECORD FOUND"));
         }
-        if (student.getStudent_status().equals(Student_Status.ACTIVE)){
-            scoreFromExamsScore = examsScoreInterface.examsScoreByStudentIdFromExams(student,
-                    student.getClasses().getParentClass().getClass_department());
-            sbaFromSBA = sbaInterface.sbaByStudentIdFromSBA(student,
-                    student.getClasses().getParentClass().getClass_department());
-            if (scoreFromExamsScore.isEmpty() || scoreFromRecordExamsScore.isEmpty()){
-                String message =
-                        """
-                        STUDENT HAS NO PASSED RECORD
-                        """;
-                throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.NOT_FOUND,message));
-            }
-            for(ExamsScore examsScore : scoreFromExamsScore){
-                for (SBA sba : sbaFromSBA){
-                    if (sba.getMarksId().equals(examsScore.getExams_score_id())){
-                        subjectSummaries.add(new TempSubjectSummary(examsScore,sba));
-                    }
+        for (ExamsScore score : scoreFromExams){
+            for (SBA sba : sbaListFromSBA){
+                if (sba.getMarksId().equals(score.getExams_score_id())){
+                    subjectSummaries.add(new TempSubjectSummary(score,sba));
                 }
             }
         }
-        for(ExamsScore examsScore : scoreFromRecordExamsScore){
-            for (SBA sba : sbaFromRecordSBA){
-                if (sba.getMarksId().equals(examsScore.getExams_score_id())){
-                    subjectSummaries.add(new TempSubjectSummary(examsScore,sba));
+        for (ExamsScore score : scoreFromRecordTable){
+            for (SBA sba : sbaListFromRecordTable){
+                if (sba.getMarksId().equals(score.getExams_score_id())){
+                    subjectSummaries.add(new TempSubjectSummary(score,sba));
                 }
             }
         }
-        for (int i = 0; i < subjectSummaries.size(); i++) {
-            for (int j = i+1; j < subjectSummaries.size() ; j++) {
-                Department department;Academic_Year year;Term term;
-                double examsScore,classScore;
-                if ((!subjectSummaries.get(i).equals(new TempSubjectSummary())|| !subjectSummaries.get(j).equals(new TempSubjectSummary())) &&
-                        (subjectSummaries.get(i).getExamsScore().getExams_score_id().getTerm_id().equals(
-                                subjectSummaries.get(j).getExamsScore().getExams_score_id().getTerm_id()))&&
-                        (subjectSummaries.get(i).getExamsScore().getExams_score_id().getClass_id().equals(
-                                subjectSummaries.get(j).getExamsScore().getExams_score_id().getClass_id()))
+        for (TempSubjectSummary summary : subjectSummaries){
+            sbaConfig = sbaConfigInterface.findSBAConfigByDepartmentAndYear(student.getClasses().getParentClass().getClass_department(),
+                    summary.getExamsScore().getAcademic_year());
+            detailsList.add(commonDetailsInterface.findDetailsByClass_Term_Year(summary.getExamsScore().getAcademic_year(),
+                    summary.getExamsScore().getExams_score_id().getClass_id(), summary.getExamsScore().getExams_score_id().getTerm_id()));
+            Optional<Double> total = summary.getClassScore().getMarks().stream().reduce(Double::sum);
+            total = Optional.of(total.orElse(0.0)*(sbaConfig.getClasswork_scale()/100.0));
+            double totalScore = total.orElse(0.0)+(summary.getExamsScore().getMarks() *
+                    ((100 - sbaConfig.getClasswork_scale())/100.0));
+            if (!listMap.containsKey(new DummyClass(summary.getExamsScore().getExams_score_id().getClass_id(),
+                    summary.getExamsScore().getExams_score_id().getTerm_id()))){
+                List<SubjectReportSummary> list = new ArrayList<>();
+                list.add(new SubjectReportSummary(summary.getExamsScore().getExams_score_id().getSubject_id().shotSubjectName(),
+                        (summary.getExamsScore().getMarks()*((100 - sbaConfig.getClasswork_scale())/100.0)),total.orElse(0.0),totalScore,summary.getExamsScore().getPosition(),
+                        Help.remarks(totalScore),Help.grade(totalScore)));
+                listMap.put(new DummyClass(summary.getExamsScore().getExams_score_id().getClass_id(),
+                                summary.getExamsScore().getExams_score_id().getTerm_id()),
+                        list);
+            }else {
+                List<SubjectReportSummary> list = listMap.get(new DummyClass(summary.getExamsScore().getExams_score_id().getClass_id(),
+                        summary.getExamsScore().getExams_score_id().getTerm_id()));
+                list.add(new SubjectReportSummary(summary.getExamsScore().getExams_score_id().getSubject_id().shotSubjectName(),
+                        summary.getExamsScore().getMarks(),total.orElse(0.0),totalScore,summary.getExamsScore().getPosition(),
+                        Help.remarks(totalScore),Help.grade(totalScore)));
+            }
+        }
+        for (Map.Entry<DummyClass,List<SubjectReportSummary>> entry : listMap.entrySet()){
+            double total = 0;
+            int size = entry.getValue().size();
+            ReportDetails reportDetail = new ReportDetails();
+            reportDetail.setReportDetailsId(new ReportDetailsId(student,new Classes(),new Term()));
+            for (SubjectReportSummary summary : entry.getValue()){
+                total += summary.getTotal();
 
-                ){
-                    department = subjectSummaries.get(i).getExamsScore().getExams_score_id().getClass_id().getParentClass().getClass_department();
-                    year = subjectSummaries.get(i).getExamsScore().getAcademic_year();
-                    term = subjectSummaries.get(i).getExamsScore().getExams_score_id().getTerm_id();
-                    sbaConfig = sbaConfigInterface.findSBAConfigByDepartmentAndYear(department,year);
-                    Optional<Double> classScoreTotal = subjectSummaries.get(j).getClassScore().getMarks().stream().reduce(
-                            Double::sum);
-                    examsScore = subjectSummaries.get(j).getExamsScore().getMarks()*(100-sbaConfig.getClasswork_scale())/100;
-                    classScore = classScoreTotal.orElse(0.0) * sbaConfig.getClasswork_scale()/100;
-                    summary = new SubjectReportSummary(
-                            subjectSummaries.get(j).getExamsScore().getExams_score_id().getSubject_id().getSubject_name(),
-                            examsScore,classScore,(examsScore+classScore),subjectSummaries.get(j).getExamsScore().getPosition(),
-                            Help.remarks(examsScore+classScore),Help.grade(examsScore+classScore)
-                    );
-                    totalScore = totalScore + (examsScore+classScore);
-                    commonReportDetails = commonDetailsInterface.findDetailsByClass_Term_Year(year,
-                            subjectSummaries.get(j).getExamsScore().getExams_score_id().getClass_id(), term);
-                    summaryList.add(summary);
-                    if (!details1.equals(new ReportDetails())) {
-                        for (ReportDetails reportDetails : details) {
-                            if (reportDetails.getReportDetailsId().getTerm_id().equals(subjectSummaries.get(j).getExamsScore().getExams_score_id().getTerm_id()) &&
-                                    reportDetails.getReportDetailsId().getClass_id().equals(subjectSummaries.get(j).getExamsScore().getExams_score_id().getClass_id())) {
-                                details1 = reportDetails;
-                            }
-                        }
-                    }
-                    subjectSummaries.set(j,new TempSubjectSummary());
+            }
+            for (ReportDetails reportDetails : details){
+                if (reportDetails.getReportDetailsId().getClass_id().equals(entry.getKey().getClasses())&&
+                        reportDetails.getReportDetailsId().getTerm_id().equals(entry.getKey().getTerm())){
+                    reportDetail = reportDetails;
                 }
             }
-            report = new Report(student,student.getStudentFullName(), totalScore, 0,
-                    totalScore/ summaryList.size(),details1,"",summaryList);
-            passReportList.add(report);
-            Help.aggregateScore(passReportList);
-            summaryList = new ArrayList<>();
-            int index = 0;
-            setModelForPassRecord(commonReportDetails,model,passReportList.get(index),sbaConfig,index+1);
+            passReportList.add(new Report(student,student.getStudentFullName(),total,0,(total/size),
+                    reportDetail,"",entry.getValue()));
         }
+        Help.aggregateScore(passReportList,subjectInterface);
+        setModelForPassRecord(detailsList.get(0),model,passReportList.get(0),sbaConfig,1);
         return "head_progress_report";
     }
 
@@ -705,6 +682,8 @@ public class Control {
         }
         model.addAttribute("guardian",guardian);
         model.addAttribute("student",student);
+        model.addAttribute("completed",Student_Status.COMPLETED);
+        model.addAttribute("active",Student_Status.ACTIVE);
         return "admin_view_student_profile";
     }
 
@@ -759,6 +738,14 @@ public class Control {
         Teacher staff = teacherInterface.findTeacherByID(teacherId);
         staff.setStatus(Student_Status.COMPLETED);
         teacherInterface.saveTeacher(staff);
+        List<Classes> classesList = classesInterface.findClassByDepartment(staff.getDepartment_Id());
+        classesList.forEach(classes -> {
+            if(classes.getClass_teacher_id().equals(staff)){
+                classes.setClass_teacher_id(new Teacher());
+            }
+            classes.getClass_teachers().remove(staff);
+            classesInterface.saveClass(classes);
+        });
         return "redirect:/staffs";
     }
 
@@ -807,7 +794,8 @@ public class Control {
             edited = 1;
         }else {
             teacherInterface.saveTeacher(teacher);
-            passwordInterface.savePassword(new PlainPassword(teacher.getUsers().getPlainPassword(),teacher));
+            passwordInterface.savePassword(new PlainPassword(
+                    teacher.getUsers().getPlainPassword(),teacher.getUsers()));
         }
         if (! fileName.equals("")) {
             String upLoadDirectory = "./pictures/staffs_pics/" + teacher.getTeacher_id();
@@ -868,7 +856,8 @@ public class Control {
     @RequestMapping(value = "/add_subject")
     public String addSubject(Model model,@ModelAttribute("sub") Subjects subjects,
                              @RequestParam(value = "optSub",required = false) String value,
-                             @RequestParam(value = "manSub",required = false) String manSub){
+                             @RequestParam(value = "manSub",required = false) String manSub)
+    {
         DepartmentHead head = findAdmin();
         List<Department> departmentList = departmentInterface.findDepartmentByHead(head);
         List<Teacher> teacherList = teacherInterface.teacherByDepartment(departmentList.get(0),Student_Status.ACTIVE);
@@ -892,6 +881,8 @@ public class Control {
         model.addAttribute("sub", Objects.requireNonNullElseGet(subjects, Subjects::new));
         model.addAttribute("dept",departmentList);
         model.addAttribute("teachers",possibleSubjectTeachers);
+        model.addAttribute("core", CoreSubject.YES);
+        model.addAttribute("notCore",CoreSubject.NOT);
         return "add_subject";
     }
 
@@ -983,15 +974,17 @@ public class Control {
         subjects.setTeacher_assigned(null);
         subjects.setSubject_Status(Student_Status.INACTIVE);
         if(subjects.getOptions().equals(SubjectOptions.OPTIONAL)){
-            Set<Subjects> subSubject = new HashSet<>();
             OptionalSubject main = optionalSubjectInterface.findMainOptSubject(subjects.getSubject_id());
-            for (Subjects sub : main.getSubjectsSet()){
-                if (! sub.equals(subjects)){
-                    subSubject.add(sub);
+            main.getSubjectsSet().remove(subjects);
+            if (main.getSubjectsSet().size() == 1){
+                for (Subjects subs : main.getSubjectsSet()) {
+                    subs.setOptions(SubjectOptions.MANDATORY);
+                    subjectInterface.saveSubject(subs);
                 }
+                optionalSubjectInterface.deleteOptionalSubjects(main);
+            }else {
+                optionalSubjectInterface.saveOptionalSubject(main);
             }
-            main.setSubjectsSet(subSubject);
-            optionalSubjectInterface.saveOptionalSubject(main);
         }
         subjectInterface.saveSubject(subjects);
         return "redirect:/subject";
@@ -1024,15 +1017,9 @@ public class Control {
             student.setFullName(student.getStudentFullName());
             optSubStuList.add(new OptionalSubjectStudents(student));
         }
-        List<Subjects> subjectsList = subjectInterface.subjectByOptionAndDepartment(SubjectOptions.OPTIONAL,
-                classes.getParentClass().getClass_department());
-        List<Long> subIds = new ArrayList<>();
-        for (Subjects subjects : subjectsList){
-            subIds.add(subjects.getSubject_id());
-        }
-        List<Subjects> optSubjectList = optionalSubjectInterface.optSubjectList(subIds);
+
         model.addAttribute("optSubStudent",new OptionalSubjectStudentSet(optSubStuList));
-        model.addAttribute("optSubject",optSubjectList);
+        model.addAttribute("optSubject",subject.getSubjectsSet());
         return "opt_student";
     }
 
@@ -1040,21 +1027,20 @@ public class Control {
     public String saveOptSubjectStudent(@ModelAttribute("optSubStudent") OptionalSubjectStudentSet
                                                     studentSet){
         List<Student> studentList = new ArrayList<>();
-        List<Long > subjectIds = new ArrayList<>();
+        Map<Subjects, List<Student>> map = new HashMap<>();
         for (OptionalSubjectStudents students : studentSet.getSubjectStudents()){
-            if (!subjectIds.contains(students.getOptSubjectId())){
-                subjectIds.add(students.getOptSubjectId());
+            Subjects subjects = subjectInterface.findSubjectById(students.getOptSubjectId());
+            Student student = studentInterface.findStudentById(students.getStudent().getStudent_id());
+            if (map.containsKey(subjects)) {
+                studentList = map.get(subjects);
             }
+            studentList.add(student);
+            map.put(subjects,studentList);
+            studentList = new ArrayList<>();
         }
-        for (Long subjectId : subjectIds) {
-            Subjects subjects = subjectInterface.findSubjectById(subjectId);
-            for (OptionalSubjectStudents students : studentSet.getSubjectStudents()) {
-                if (Objects.equals(subjects.getSubject_id(), students.getOptSubjectId())) {
-                    studentList.add(studentInterface.findStudentById(students.getStudent().getStudent_id()));
-                }
-            }
-            subjects.setStudentSet(new HashSet<>(studentList));
-            subjectInterface.saveSubject(subjects);
+        for (Map.Entry<Subjects,List<Student>> entry : map.entrySet()){
+            entry.getKey().setStudentSet(new HashSet<>(entry.getValue()));
+            subjectInterface.saveSubject(entry.getKey());
         }
         return "redirect:/subject";
     }
@@ -1215,17 +1201,27 @@ public class Control {
     }
 
     @RequestMapping(value = "/batch_student")
-    public String batchInsertStudent(Model model){
+    public String batchInsertStudent(){
+        return "batch";
+    }
+
+    @RequestMapping(value = "/batch_student_form")
+    public String batchStudentForm(Model model){
         DepartmentHead head = findAdmin();
         List<Classes> classesList = classesInterface.listClassByDepartmentHead(head);
         model.addAttribute("cls",classesList);
-        return "add_batch_student";
+        return "batch_student_form";
     }
 
-    @RequestMapping(value = "/save_batch_students")
-    public String saveBatchStudent(@ModelAttribute("file")MultipartFile file,
-                                   @RequestParam("cls")String classId) throws AppExceptions {
-        Help.readFile(file,studentInterface,classesInterface,classId);
+    @RequestMapping(value = "/save_batch_students",method = RequestMethod.POST , produces = "application/json")
+    public String saveBatchStudent(@ModelAttribute("file")MultipartFile file, Model model,
+                                   @RequestParam("clsId")String classId) throws AppExceptions {
+
+        List<Integer>  index =  Help.readFile(file,studentInterface,classId,relationshipTypeInterface, guardianInterface,classesInterface);
+        if ( ! index.isEmpty()){
+           model.addAttribute("reject",index);
+           return "rejected_record";
+        }
         return "redirect:/admin_view_student?cls="+classId;
     }
     @RequestMapping(value = "/promotion")
@@ -1288,7 +1284,7 @@ public class Control {
         }
         List<PromotionResults> results = Help.promotion(classesInterface,passMark,trialMark,Integer.parseInt(criteria),
                 studentInterface,examsScoreInterface,sbaInterface,reportDetailInterface,
-                head,termInterface,parentClassInterface);
+                head,termInterface,parentClassInterface,yearCompletedInterface,academicYearInterface);
         if (criteria.equals("3")){
             throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.OK,"PROMOTION SUCCESSFUL"));
         }
@@ -1303,39 +1299,20 @@ public class Control {
         return "promotion_results";
     }
 
-    @RequestMapping(value = "/head_prev_pass_report")
-    public String prev_pass_report(@RequestParam("index") Integer index,Model model) throws AppExceptions{
-        Report report;
-        if (index <=0){
-            String message = "END OF STUDENT RECORD";
-            throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.OK,message));
-        }else {
-            report = passReportList.get(--index);
-        }
-        passReportNextPrev(report,model,index);
-        return "pass_report";
-    }
-
     @RequestMapping(value = "/head_next_pass_report")
     public String next_pass_report(@RequestParam("index") Integer index,Model model) throws AppExceptions{
-        Report report;
+        Report report = new Report();
         if (index > passReportList.size()-1){
             String message = "END OF STUDENT RECORD";
             throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.OK,message));
         }else {
             report = passReportList.get(index);
         }
-        passReportNextPrev(report,model,++index);
+        SBAConfig sbaConfig = sbaConfigInterface.findSBAConfigByDepartmentAndYear(
+                report.getStudent().getClasses().getParentClass().getClass_department(),
+                report.getReportDetails().getAcademic_year());
+        setModelForPassRecord(detailsList.get(index),model,report,sbaConfig,++index);
         return "pass_report";
-    }
-    private void passReportNextPrev(Report report,Model model,Integer index){
-        Department department = report.getReportDetails().getReportDetailsId().getClass_id().getParentClass().getClass_department();
-        Academic_Year year = report.getReportDetails().getAcademic_year();
-        Term term = report.getReportDetails().getReportDetailsId().getTerm_id();
-        Classes classes = report.getReportDetails().getReportDetailsId().getClass_id();
-        CommonReportDetails details = commonDetailsInterface.findDetailsByClass_Term_Year(year,classes,term);
-        SBAConfig config = sbaConfigInterface.findSBAConfigByDepartmentAndYear(department,year);
-        setModelForPassRecord(details,model,report,config,index);
     }
 
     @RequestMapping(value = "/parentClass")
@@ -1354,12 +1331,17 @@ public class Control {
     public String viewParentClass(@RequestParam("parent") Long parentClassId, Model model){
         ParentClass parentClass = parentClassInterface.findParentClassById(parentClassId);
         List<Classes> classesList = classesInterface.classByParentClass(parentClass);
+        final List<String> classNames = new ArrayList<>();
+        classesList.forEach(classes -> classNames.add(classes.getClass_name()));
         model.addAttribute("parentClass", parentClass);
-        model.addAttribute("classes",classesList);
+        model.addAttribute("classes",classNames);
         return "view_parent_class";
     }
 
-    // throw error if parent class has only one subclass
+    /*
+    throw error if parent class has only one subclass
+    add field status to class;
+     */
     @RequestMapping(value = "/merge_parent_class")
     public String mergeParentClass(@RequestParam("parent") Long parentClassId) throws AppExceptions{
         ParentClass parentClass = parentClassInterface.findParentClassById(parentClassId);
@@ -1370,16 +1352,22 @@ public class Control {
                     "CANNOT MERGE A PARENT CLASS WITH ONLY A SINGLE SUBCLASS"));
         else {
             Classes classes = classesList.get(0);
-            for (Classes classes1 : classesList){
+            for (int i = 1; i < classesList.size(); i++) {
+                Classes classes1 = classesList.get(i);
                 studentList.addAll(studentInterface.studentsByClass(Student_Status.ACTIVE,classes1));
-                classesInterface.deleteClass(classes1);
+                classes1.setParentClass(null);
+                classes1.setClass_teachers(new HashSet<>());
+                classes1.setClass_teacher_id(null);
+                classesInterface.saveClass(classes1);
             }
             classes.setClass_name(parentClass.getParentClassName());
             classesInterface.saveClass(classes);
             Classes newClass = classesInterface.findClassById(classes.getClass_id());
-            for (Student student : studentList){
-                student.setClasses(newClass);
-                studentInterface.saveStudent(student);
+            if (! studentList.isEmpty()) {
+                for (Student student : studentList) {
+                    student.setClasses(newClass);
+                    studentInterface.saveStudent(student);
+                }
             }
         }
         return "redirect:/classes";
@@ -1407,7 +1395,10 @@ public class Control {
             studentList.addAll(studentInterface.studentsByClass(Student_Status.ACTIVE,classes));
             teacherList.addAll(classes.getClass_teachers());
             classTeacher.add(classes.getClass_teacher_id());
-            classesInterface.deleteClass(classes);
+            classes.setParentClass(null);
+            classes.setClass_teacher_id(null);
+            classes.setClass_teachers(new HashSet<>());
+            classesInterface.saveClass(classes);
         }
         int split = Integer.parseInt(splitNum);
         for (int i = 0; i < split; i++) {
@@ -1422,9 +1413,12 @@ public class Control {
             }
             newClassList.add(newClass);
         }
-        for (Student student : studentList){
-            student.setClasses(newClassList.get(random.nextInt(newClassList.size())));
-            studentInterface.saveStudent(student);
+        newClassList.forEach(classesInterface::saveClass);
+        if (! studentList.isEmpty()) {
+            for (Student student : studentList) {
+                student.setClasses(newClassList.get(random.nextInt(newClassList.size())));
+                studentInterface.saveStudent(student);
+            }
         }
         return "redirect:/classes";
     }
@@ -1477,9 +1471,187 @@ public class Control {
         model.addAttribute("subjects",subjects);
         return "opt_main_subject";
     }
-
-    @GetMapping("/login")
+    @RequestMapping(value = "/login",method = RequestMethod.GET)
     public String loginPage(){
         return "login";
     }
+
+    @RequestMapping(value = "/view_opt_main")
+    public String viewOptMainSub(@RequestParam("sub")Long subId,Model model){
+        OptionalSubject subject = optionalSubjectInterface.findOptSubjectById(subId);
+        model.addAttribute("subject",subject);
+        return "opt_main_sub_view";
+    }
+
+    @RequestMapping(value = "/edit_opt_main")
+    public String editOptMainSub(@RequestParam("sub") Long subId, Model model){
+        OptionalSubject subject = optionalSubjectInterface.findOptSubjectById(subId);
+        model.addAttribute("subject",subject);
+        return "edit_opt_main_sub";
+    }
+
+    @RequestMapping(value = "/edit_sub_subjects")
+    public String editSubSubject(@RequestParam("num") String number,Model model,
+                                 @ModelAttribute("subject") OptionalSubject subjects){
+        OptionalSubject optionalSubject = optionalSubjectInterface.findOptSubjectById(subjects.getOpt_sub_id());
+        optionalSubject.setOpt_sub_name(subjects.getOpt_sub_name());
+        optionalSubjectInterface.saveOptionalSubject(optionalSubject);
+        List<Teacher> teacherList = teacherInterface.teacherByDepartment(
+                optionalSubject.getDepartment_subject(), Student_Status.ACTIVE);
+        Help.filterTeachers(teacherList,teacherList.get(0).getDepartment_Id(),subjectInterface);
+        teacherList.forEach(teacher -> teacher.setFullName(teacher.getStaffFullName()));
+        SubjectSet set = new SubjectSet();
+        if ( Integer.parseInt(number) > optionalSubject.getSubjectsSet().size()){
+            int limit = Integer.parseInt(number) - optionalSubject.getSubjectsSet().size();
+            for (int i = 0; i <limit ; i++) {
+                optionalSubject.getSubjectsSet().add(new Subjects());
+            }
+        }
+        set.setSubSubjectList(new ArrayList<>(optionalSubject.getSubjectsSet()));
+        model.addAttribute("numberOfSubject",Integer.parseInt(number));
+        model.addAttribute("optSubject",optionalSubject);
+        model.addAttribute("subList",set);
+        model.addAttribute("tch",teacherList);
+        return "edit_opt_main_sub_subject";
+    }
+
+    @RequestMapping(value = "/save_edited_opt_sub_subject")
+    public String saveEditedOptMainSubject(@ModelAttribute("subList")SubjectSet set,
+                                           @RequestParam("optId") Long optId){
+        OptionalSubject optionalSubject = optionalSubjectInterface.findOptSubjectById(optId);
+        Set<Subjects> subjectsSet = new HashSet<>();
+        set.getSubSubjectList().forEach(subjects -> {
+            Optional<Long> subId = Optional.ofNullable(subjects.getSubject_id());
+            if (subId.isPresent() && subId.get() > 0){
+                Subjects subject = subjectInterface.findSubjectById(subjects.getSubject_id());
+                subject.setSubject_name(subjects.getSubject_name());
+                subject.setTeacher_assigned(teacherInterface.findTeacherByID(
+                        subjects.getTeacher_assigned().getTeacher_id()));
+                subject.setSubject_Status(Student_Status.ACTIVE);
+                subject.setDepartment_subject(optionalSubject.getDepartment_subject());
+                subject.setOptions(SubjectOptions.OPTIONAL);
+                subjectInterface.saveSubject(subject);
+                subjectsSet.add(subject);
+            }else {
+                subjects.setSubject_Status(Student_Status.ACTIVE);
+                subjects.setDepartment_subject(optionalSubject.getDepartment_subject());
+                subjects.setOptions(SubjectOptions.OPTIONAL);
+                subjects.setTeacher_assigned(teacherInterface.findTeacherByID(
+                        subjects.getTeacher_assigned().getTeacher_id()));
+                subjectsSet.add(subjects);
+            }
+        });
+        optionalSubject.setSubjectsSet(subjectsSet);
+        optionalSubjectInterface.saveOptionalSubject(optionalSubject);
+        return "redirect:/subject";
+    }
+
+    @RequestMapping(value = "/delete_opt_verify")
+    public String deleteOptMainSub(@RequestParam("sub") Long subId,Model model){
+        OptionalSubject optionalSubject = optionalSubjectInterface.findOptSubjectById(subId);
+        model.addAttribute("subs",optionalSubject);
+        return "delete_opt_main_sub_verify";
+    }
+
+    @RequestMapping(value = "/delete_opt_main_sub")
+    public String deleteOptMainSubAndSubSubject(@RequestParam("sub")Long subId){
+        OptionalSubject optionalSubject = optionalSubjectInterface.findOptSubjectById(subId);
+        for (Subjects subjects : optionalSubject.getSubjectsSet()){
+            subjects.setSubject_Status(Student_Status.INACTIVE);
+            subjectInterface.saveSubject(subjects);
+        }
+        optionalSubjectInterface.deleteOptionalSubjects(optionalSubject);
+        return "redirect:/opt_main_sub";
+    }
+
+    @RequestMapping(value = "/admin_records_form")
+    public String adminRecordForm(Model model) throws AppExceptions{
+        List<Academic_Year> yearList = yearCompletedInterface.yearCompleted();
+        if (yearList.isEmpty()){
+            throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.NOT_FOUND,
+                    "NO PASSED STUDENT RECORD"));
+        }
+        model.addAttribute("years",yearList);
+        return "admin_record_form";
+    }
+
+    @RequestMapping(value = "/admin_records")
+    public String adminPassRecordsByStudent(@RequestParam("yrs") Long yearId,Model model){
+        List<StudentCompletedYear> studentCompletedYears = yearCompletedInterface.studentByCompletedYear(
+                academicYearInterface.findAcademicYearById(yearId));
+        model.addAttribute("students",studentCompletedYears);
+        return "passed_student_list";
+    }
+
+    @RequestMapping(value = "/promotion_form")
+    public String promotionForm(){
+        return "promotion";
+    }
+
+
+    @RequestMapping(value = "/head_summary_report")
+    public String headSummaryReport(@RequestParam("student_id")String studentId,
+                                    Model model) throws AppExceptions{
+        Student student = studentInterface.findStudentById(studentId);
+        List<SummaryReport> summaryReports = examsScoreInterface.summaryReport(studentId,
+                student.getClasses().getParentClass().getClass_department());
+        List<SummaryReport> summaryReportFromRecord = examsScoreInterface.summaryReportFromRecordTable(studentId,
+                student.getClasses().getParentClass().getClass_department());
+        if (summaryReports.size() == 0 && summaryReportFromRecord.size() == 0){
+            throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.NOT_FOUND,
+                    "NO RECORD FOUND"));
+        }
+        Map<String, Map<String,List<TermRecords>>> listMap = new HashMap<>();
+        List<String> subjectName = new ArrayList<>();
+        List<String> categories = new ArrayList<>();
+        List<TermRecords> seriesList = new ArrayList<>();
+        for (SummaryReport report : summaryReports) {
+            Map<String, List<TermRecords>> map;
+            if (!listMap.containsKey(report.getSubjectName())) {
+                map = new HashMap<>();
+                map.put(report.getClassName(),List.of(new TermRecords(report.getTermName(),report.getMarks())));
+            } else {
+                map = listMap.get(report.getSubjectName());
+                List<TermRecords> list = map.get(report.getClassName());
+                list.add(new TermRecords(report.getTermName(),report.getMarks()));
+                map.put(report.getClassName(),list);
+            }
+            listMap.put(report.getSubjectName(),map);
+        }
+        for (SummaryReport report : summaryReportFromRecord){
+            Map<String, List<TermRecords>> map;
+            if (!listMap.containsKey(report.getSubjectName())) {
+                map = new HashMap<>();
+                map.put(report.getClassName(),List.of(new TermRecords(report.getTermName(),report.getMarks())));
+            } else {
+                map = listMap.get(report.getSubjectName());
+                List<TermRecords> list = map.get(report.getClassName());
+                list.add(new TermRecords(report.getTermName(),report.getMarks()));
+                map.put(report.getClassName(),list);
+            }
+            listMap.put(report.getSubjectName(),map);
+        }
+        for (Map.Entry<String,Map<String,List<TermRecords>>> entry : listMap.entrySet()){
+            subjectName.add(entry.getKey());
+            Map<String,List<TermRecords>> listMap1 = entry.getValue();
+            for (Map.Entry<String,List<TermRecords>> listEntry : listMap1.entrySet()){
+                List<Double> doubleList = new ArrayList<>();
+                for (TermRecords report : listEntry.getValue()){
+                    categories.add(report.getTerm());
+                    doubleList.add(report.getMark());
+                }
+                seriesList.add(new TermRecords(listEntry.getKey(),doubleList));
+            }
+        }
+        for (int i = 0; i < categories.size(); i++) {
+            if (i > 2)
+                categories.remove(categories.get(i));
+        }
+        System.out.println(seriesList);
+        model.addAttribute("category",categories);
+        model.addAttribute("series",seriesList);
+        model.addAttribute("subject",subjectName);
+        return "headSummaryReport";
+    }
+
 }

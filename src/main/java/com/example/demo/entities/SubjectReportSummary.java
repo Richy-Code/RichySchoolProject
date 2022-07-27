@@ -16,9 +16,4 @@ public class SubjectReportSummary {
     private String remarks;
     private String grade;
 
-    public SubjectReportSummary(String subject_name, double exams_score, double class_score) {
-        this.subject_name = subject_name;
-        this.exams_score = exams_score;
-        this.class_score = class_score;
-    }
 }

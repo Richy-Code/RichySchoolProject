@@ -52,7 +52,14 @@
                             <tr>
                                 <td class="right">SUBJECT NAME</td>
                                 <td class="left">
-                                    <input type="text" class="form-control" required th:field="*{subject_name}">
+                                    <input type="text" class="form-control" required th:field="*{subject_name}" autocapitalize="characters">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="right">CORE SUBJECT</td>
+                                <td style="display: flex; padding-top: 10px; padding-left: 20px;">
+                                    <input type="radio" th:field="*{coreSubject}" th:value="${core}" class="form-check" required><span style="margin-left: 10px;">YES</span>
+                                    <input type="radio" th:field="*{coreSubject}" th:value="${notCore}" class="form-check" style="margin-left: 50px;"> <span style="margin-left: 10px;">NO</span>
                                 </td>
                             </tr>
                             <tr>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{batch.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>REJECT DATA</title>
+</head>
+<body>
+<div id="main-content">
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><h3 style="color: white;">REJECT STUDENT DATA</h3></li>
+            <li><a th:href="@{/admin}">HOME</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    <div style="text-align: center; font-weight:bold; text-decoration:underline">
+        <h1 >REJECTED RECORDS</h1>
+        <h3>RECORDS DOES NOT MEET SPECIFIED REQUIREMENT</h3>
+    </div>
+    <div style="align-self: center; width: max-content; margin-top: 20px;">
+        <table class="table table-striped">
+            <thead>
+            <tr  style="text-align: center;">
+                <th>REJECT RECORD</th>
+                <th>LINE NUMBER</th>
+            </tr>
+            </thead>
+            <tbody style="text-align: center;">
+            <tr th:each="rec : ${reject}">
+                <td th:text="'RECORD AT'"></td>
+                <td th:text="${rec}"></td>
+            </tr>
+            <tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

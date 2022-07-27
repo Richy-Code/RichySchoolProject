@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import com.example.demo.binding_entities.SummaryReport;
 import com.example.demo.entities.*;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -43,12 +44,15 @@ public interface ExamsScoreRepository extends CrudRepository<ExamsScore, MarksId
    void truncateExamsScore();
 
     @Query("SELECT es FROM ExamsScore  es WHERE es.exams_score_id.student_id = :student AND " +
-            "es.exams_score_id.subject_id = :subject")
+            "es.exams_score_id.subject_id = :subject GROUP BY es.exams_score_id.class_id," +
+            "es.exams_score_id.term_id")
     List<ExamsScore> examsScoreByStudentIdAndSubject(@Param("student")Student student
             ,@Param("subject")Subjects subjects);
 
     @Query("SELECT es FROM Record_Exams es WHERE es.exams_score_id.student_id = :student_Id " +
-            "AND es.exams_score_id.subject_id = :subject")
+            "AND es.exams_score_id.subject_id = :subject GROUP BY es.exams_score_id.class_id," +
+            "es.exams_score_id.term_id")
     List<Record_Exams> examsScoreByStudentIdAndSubjectFromRecordExams
             (@Param("student_Id") Student student_id,@Param("subject")Subjects subjects);
+
 }

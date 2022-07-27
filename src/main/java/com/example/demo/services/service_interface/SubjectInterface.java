@@ -20,5 +20,6 @@ public interface SubjectInterface {
 
     List<String> teacherSubjectName(Teacher teacher);
 
-    List<Subjects> subjectByOptionAndDepartment(SubjectOptions options, Department department);
+    List<Subjects> subjectByOptionAndDepartment(SubjectOptions options, Department department,
+                                                Student_Status status);
 }

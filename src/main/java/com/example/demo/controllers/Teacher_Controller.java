@@ -15,7 +15,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -57,6 +56,8 @@ public class Teacher_Controller {
     private final List<Report> reportFillingList = new ArrayList<>();
 
     private final List<Report> passReportList = new ArrayList<>();
+
+    private final List<CommonReportDetails> detailsList = new ArrayList<>();
     public Teacher_Controller(StudentInterface studentInterface,
                               UserServiceInterface userServiceInterface,
                               SubjectInterface subjectInterface,
@@ -144,7 +145,7 @@ public class Teacher_Controller {
         Classes classes = classesInterface.findClassById(class_id);
         Subjects subjects = subjectInterface.findSubjectById(subject_id);
         Term term = termInterface.findTermById(term_id);
-        List<Student> studentList;
+        List<Student> studentList = new ArrayList<>();
         List<ExamsScore> examsScores = examsScoreInterface.examsScores(classes,subjects,term);
         List<SBA> sbaList = sbaInterface.sbaList(classes,subjects,term);
         Academic_Year year = academicYearInterface.findAcademicYearByMaxId(Status.CURRENT);
@@ -153,22 +154,25 @@ public class Teacher_Controller {
             sbaConfig = new SBAConfig();
         }
         if (subjects.getOptions().equals(SubjectOptions.OPTIONAL)) {
-            studentList = new ArrayList<>((Collection) subjects.getStudentSet().stream().filter(
-                    student -> student.getStudent_status().equals(Student_Status.ACTIVE) &&
-                            student.getClasses().equals(classes)
-            ));
+            List<Student> finalStudentList = studentList;
+            subjects.getStudentSet().forEach(student -> {
+                if (student.getClasses().equals(classes) && student.getStudent_status().equals(
+                        Student_Status.ACTIVE)){
+                    finalStudentList.add(student);
+                }
+            });
         }else {
             studentList  = studentInterface.studentsByClass(Student_Status.ACTIVE,classes);
         }
         List<ExamsScore> previous = null;
-        if (examsScores.isEmpty() && sbaList.isEmpty()){
+        if (examsScores.size()==0 && sbaList.size()==0){
             for (Student student : studentList){
                 examsEntry = new ExamsEntry();
                 examsEntry.setStudentId(student.getStudent_id());
                 examsEntry.setStudentFull_name(student.getStudentFullName());
                 examsEntryList.add(examsEntry);
             }
-        } else if (!examsScores.isEmpty() && sbaList.isEmpty()) {
+        } else if (examsScores.size() !=0 && sbaList.size() ==0) {
             for (Student student : studentList){
                 for (ExamsScore score : examsScores){
                     if (student.equals(score.getExams_score_id().getStudent_id())){
@@ -188,7 +192,7 @@ public class Teacher_Controller {
                     }
                 }
             }
-        } else if (examsScores.isEmpty()){
+        } else if (examsScores.size() == 0){
             for (Student student : studentList){
                 for (SBA sba : sbaList){
                     if (student.equals(sba.getMarksId().getStudent_id())){
@@ -199,7 +203,6 @@ public class Teacher_Controller {
                     }
                 }
             }
-            Help.findPosition(examsEntryList);
         }else {
             for (Student student : studentList){
                for(ExamsScore score : examsScores){
@@ -210,6 +213,7 @@ public class Teacher_Controller {
                            examsEntry = getExamsEntry(student, sba,sbaConfig);
                            examsEntry.setTotal_exam_marks(examsEntry.getTotal_sba() +(
                                    score.getMarks()* (100-sbaConfig.getClasswork_scale())/100));
+                           examsEntry.setGrade(Help.grade(examsEntry.getTotal_exam_marks()));
                            examsEntry.setPosition(score.getPosition());
                            examsEntry.setExamsScore(score.getMarks());
                            examsEntry.setPercent_of_total_exams(score.getMarks() *
@@ -236,6 +240,7 @@ public class Teacher_Controller {
             if (optional.isPresent() && classes1.getClass_teacher_id().equals(teacher))
                 teacher_class_id = classes1.getClass_id();
         }
+        Help.findPosition(examsEntryList);
         exams_entrySet.setExamsEntries(examsEntryList);
         model.addAttribute("term",term);
         model.addAttribute("subject",subjects);
@@ -339,17 +344,20 @@ public class Teacher_Controller {
         Classes classes = classesInterface.findClassById(class_id);
         Subjects subjects = subjectInterface.findSubjectById(subject_id);
         Term term = termInterface.findTermById(term_id);
-        List<Student> studentList;
+        List<Student> studentList = new ArrayList<>();
         List<SBA> sbaList = sbaInterface.sbaList(classes,subjects,term);
         Academic_Year year = academicYearInterface.findAcademicYearByMaxId(Status.CURRENT);
         SBAConfig sbaConfig = sbaConfigInterface.findSBAConfig(classes.getParentClass().getClass_department(), year,Status.CURRENT);
         double [] class_work = new double[sbaConfig.getNumber_of_classwork_columns()];
-        List<SBA> previous_list = null;
+        List<SBA> previous_list = new ArrayList<>();
         if (subjects.getOptions().equals(SubjectOptions.OPTIONAL)) {
-            studentList = new ArrayList<>((Collection) subjects.getStudentSet().stream().filter(
-                    student -> student.getStudent_status().equals(Student_Status.ACTIVE) &&
-                            student.getClasses().equals(classes)
-            ));
+            List<Student> finalStudentList = studentList;
+            subjects.getStudentSet().forEach(student -> {
+                if (student.getClasses().equals(classes) && student.getStudent_status().equals(
+                        Student_Status.ACTIVE)){
+                        finalStudentList.add(student);
+                }
+            });
         }else {
             studentList =  studentInterface.studentsByClass(Student_Status.ACTIVE,classes);
         }
@@ -411,6 +419,7 @@ public class Teacher_Controller {
             previous_list = sbaInterface.sbaList(classes,subjects,termInterface.findTermById(2L));
         else if(term_id.intValue() ==2)
             previous_list = sbaInterface.sbaList(classes,subjects,termInterface.findTermById(3L));
+        assert previous_list != null;
         if(previous_list.size() != 0)
             return "teacher_sba_view_page";
         else if(! teacher_class_id.equals(""))
@@ -448,6 +457,7 @@ public class Teacher_Controller {
     @RequestMapping(value = "/terminal_report")
     public String terminalReport(@RequestParam("trm")Long term_id,@RequestParam("cls")
                                  String class_id ,Model model){
+        reportList.clear();
         Classes classes = classesInterface.findClassById(class_id);
         Term term = termInterface.findTermById(term_id);
         Academic_Year year = academicYearInterface.findAcademicYearByMaxId(Status.CURRENT);
@@ -472,11 +482,11 @@ public class Teacher_Controller {
                 summary = new SubjectReportSummary();
                 report = new Report();
                 if (subjects1.getOptions().equals(SubjectOptions.OPTIONAL) && subjects1.getStudentSet().contains(student1)) {
-                    summary.setSubject_name(subjects1.getSubject_name());
+                    summary.setSubject_name(subjects1.shotSubjectName());
                 }else if (subjects1.getOptions().equals(SubjectOptions.OPTIONAL) && ! subjects1.getStudentSet().contains(student1)){
                     continue;
                 }else {
-                    summary.setSubject_name(subjects1.getSubject_name());
+                    summary.setSubject_name(subjects1.shotSubjectName());
                 }
 
                 summaryList.add(summary);
@@ -518,37 +528,29 @@ public class Teacher_Controller {
                             report1.setTotal_score(report1.getTotal_score() + summary1.getTotal());
                         }
                     }
-                    report1.setAverage_score(report1.getAverage_score()/(100.0*subjects.size()));
+                    report1.setAverage_score(report1.getTotal_score()/(100.0*subjects.size()));
                     break;
                 }
             }
         }
+
         for (Report report1 : reportList){
-            for (ReportDetails details : reportDetails){
-                if(report1.getStudent().equals(details.getReportDetailsId().getStudent_id())){
+            report1.setReportDetails(new ReportDetails());
+        }
+        for (ReportDetails details : reportDetails){
+            for (Report report1 : reportList){
+                if (details.getReportDetailsId().getStudent_id().equals(
+                        report1.getStudent())){
                     report1.setReportDetails(details);
                     break;
                 }
             }
-            report1.setReportDetails(new ReportDetails());
-
         }
         Help.findPositionInClass(reportList);
-        Help.aggregateScore(reportList);
+        Help.aggregateScore(reportList,subjectInterface);
         report = reportList.get(0);
         model.addAttribute("num_on_roll",reportList.size());
         setModels(model,report,classes,term,1);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String user_name = authentication.getName();
-        Users users = userServiceInterface.getUser(user_name);
-        Teacher teacher = teacherInterface.findTeacherByUsers(users);
-        for (Subjects subjects1 : subjectInterface.findSubjectByTeacher(teacher)){
-            if (subjects1.getOptions().equals(SubjectOptions.OPTIONAL) &&
-                ! subjects1.getStudentSet().contains(report.getStudent())){
-                return "progress_report_no_sub";
-            }
-        }
-
         return "progress_report";
     }
 
@@ -573,7 +575,6 @@ public class Teacher_Controller {
         common = (common != null) ? common : new CommonReportDetails();
         SBAConfig config = sbaConfigInterface.findSBAConfig(classes.getParentClass().getClass_department(), year,Status.CURRENT);
         config = (config == null) ? new SBAConfig() : config;
-        ReportDetails details = new ReportDetails();
         model.addAttribute("report",report);
         model.addAttribute("class",classes);
         model.addAttribute("academic_year",year);
@@ -584,7 +585,6 @@ public class Teacher_Controller {
         model.addAttribute("conduct", conductInterface.findAllConducts());
         model.addAttribute("remarks",remarksInterface.allRemarks());
         model.addAttribute("interest", interestInterface.findAllInterest());
-        model.addAttribute("reportDetail", details);
         model.addAttribute("num_on_roll",reportFillingList.size());
     }
 
@@ -622,9 +622,22 @@ public class Teacher_Controller {
     }
     @RequestMapping(value = "/report_filling")
     public String reportFilling(@RequestParam("cls") String class_id,
-                                @RequestParam("trm") Long term_id,Model model){
+                                @RequestParam("trm") Long term_id,Model model) throws AppExceptions{
+        reportFillingList.clear();
         Classes classes = classesInterface.findClassById(class_id);
         Term term = termInterface.findTermById(term_id);
+        List<ExamsScore> previousScores = new ArrayList<>();
+        if (term.getTerm_id() == 1L)
+            previousScores = examsScoreInterface.findExamsScoreByClassAndTerm(classes,
+                    termInterface.findTermById(2L));
+        else if (term.getTerm_id() == 2L) {
+            previousScores = examsScoreInterface.findExamsScoreByClassAndTerm(classes,
+                    termInterface.findTermById(3L));
+        }
+        if (previousScores.size() !=0){
+            throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.BAD_REQUEST,
+                    "NOT ALLOWED TO EDIT PASSED RECORD"));
+        }
         Academic_Year year = academicYearInterface.findAcademicYearByMaxId(Status.CURRENT);
         SubjectReportSummary summary ;
         List<SubjectReportSummary> summaryList = new ArrayList<>();
@@ -654,11 +667,11 @@ public class Teacher_Controller {
                 summary = new SubjectReportSummary();
                 report = new Report();
                 if (subjects1.getOptions().equals(SubjectOptions.OPTIONAL) && subjects1.getStudentSet().contains(student1)) {
-                    summary.setSubject_name(subjects1.getSubject_name());
+                    summary.setSubject_name(subjects1.shotSubjectName());
                 }else if (subjects1.getOptions().equals(SubjectOptions.OPTIONAL) && ! subjects1.getStudentSet().contains(student1)){
                     continue;
                 }else {
-                    summary.setSubject_name(subjects1.getSubject_name());
+                    summary.setSubject_name(subjects1.shotSubjectName());
                 }
                 summaryList.add(summary);
             }
@@ -699,194 +712,151 @@ public class Teacher_Controller {
                             report1.setTotal_score(report1.getTotal_score() + summary1.getTotal());
                         }
                     }
-                    report1.setAverage_score(report1.getAverage_score()/(100.0*subjects.size()));
+                    report1.setAverage_score(report1.getTotal_score()/(100.0*subjects.size()));
                     break;
                 }
             }
         }
         for (Report report1 : reportFillingList){
-            for (ReportDetails details : reportDetails){
-                if(report1.getStudent().equals(details.getReportDetailsId().getStudent_id())){
+            report1.setReportDetails(new ReportDetails());
+        }
+        for (ReportDetails details : reportDetails){
+            for (Report report1 : reportFillingList){
+                if (details.getReportDetailsId().getStudent_id().equals(
+                        report1.getStudent())){
                     report1.setReportDetails(details);
                     break;
                 }
             }
-            report1.setReportDetails(new ReportDetails());
-
         }
         Help.findPositionInClass(reportFillingList);
-        Help.aggregateScore(reportFillingList);
+        Help.aggregateScore(reportFillingList,subjectInterface);
         report = reportFillingList.get(0);
-
         setModels(model,report,classes,term,1);
         return "class_teacher_fill_report";
     }
 
     @RequestMapping(value = "/save_report_details")
-    public String saveReportDetails(@ModelAttribute("reportDetails") ReportDetails details,
+    public String saveReportDetails(@ModelAttribute("reportDetails") Report details,
                                     @RequestParam("stu") String student_id,@RequestParam("trm")
                                     Long term_id,@RequestParam("cls") String class_id,
-                                    @RequestParam("idx") Integer index,@RequestParam("pos_in_clas") String pos_in_class
+                                    @RequestParam("idx") Integer index,@RequestParam("pos_in_class") String pos_in_class
                                     ,@ModelAttribute("commonDetails") CommonReportDetails commonDetails){
         Student student = studentInterface.findStudentById(student_id);
         Classes classes = classesInterface.findClassById(class_id);
         Term term = termInterface.findTermById(term_id);
         ReportDetailsId id = new ReportDetailsId(student,classes,term);
-        details.setReportDetailsId(id);
+        details.getReportDetails().setReportDetailsId(id);
         details.setPosition_in_class(pos_in_class);
         Academic_Year year = academicYearInterface.findAcademicYearByMaxId(Status.CURRENT);
-        details.setAcademic_year(year);
+        details.getReportDetails().setAcademic_year(year);
         CommonReportDetails common;
         if (commonDetails.getTotal_attendance() != 0){
             common = commonDetailsInterface.findDetailsByClass_Term_Year(year,classes,term);
             common.setTotal_attendance(commonDetails.getTotal_attendance());
             commonDetailsInterface.updateCommonReportDetails(common.getTotal_attendance(),common.getCommon_Details_id());
         }
-        reportDetailInterface.saveDetails(details);
-        Help.saveRemark(details.getTeacher_remark(),remarksInterface);
-        Help.saveInterest(details.getInterest(),interestInterface);
-        Help.saveConduct(details.getAttitude(),conductInterface);
-        return "redirect:/next_report_filling?cls="+classes+"trm="+term+"idx="+index;
+        Help.saveRemark(details.getReportDetails().getTeacher_remark(),remarksInterface);
+        Help.saveInterest(details.getReportDetails().getInterest(),interestInterface);
+        Help.saveConduct(details.getReportDetails().getAttitude(),conductInterface);
+        return "redirect:/next_report_filling?cls="+classes.getClass_id()+"&trm="+term.getTerm_id()+"&index="+index;
     }
 
     @RequestMapping(value = "/next_report_filling")
     public String nextReportFilling(@RequestParam("cls") String class_id,@RequestParam("trm")
-                                    Long term_id, @RequestParam("index") Integer index,Model model) throws AppExceptions{
+                                    Long term_id, @RequestParam("index") Integer index,Model model){
         Report report;
         Classes classes = classesInterface.findClassById(class_id);
         if (index > reportFillingList.size()-1){
-            String message = "END OF STUDENT RECORD IN "+ classes.getClass_name();
-            throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.OK,message));
+            return "redirect:/report_filling_form";
         }else
             report = reportFillingList.get(index);
         Term term = termInterface.findTermById(term_id);
         setModels(model,report,classes,term,++index);
         return "class_teacher_fill_report";
     }
-    @RequestMapping(value = "/prev_report_filling")
-    public String prevReportFilling(@RequestParam("cls") String class_id,@RequestParam("trm")
-                                    Long term_id, @RequestParam("index") Integer index,Model model) throws AppExceptions{
-        Report report;
-        Classes classes = classesInterface.findClassById(class_id);
-        if (index <= 0){
-            String message = "END OF STUDENT RECORD IN "+ classes.getClass_name();
-            throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.OK,message));
-        }else
-            report = reportFillingList.get(--index);
 
-        Term term = termInterface.findTermById(term_id);
-        setModels(model,report,classes,term,index);
-        return "class_teacher_fill_report";
-    }
-    // throw exception
-    @RequestMapping(value = "/passed_record/{student_id}")
-    public String passedRecord(@PathVariable(value = "student_id") String student_id,Model model) throws AppExceptions {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String user_name = authentication.getName();
-        Users users = userServiceInterface.getUser(user_name);
-        Teacher teacher = teacherInterface.findTeacherByUsers(users);
+    @RequestMapping(value = "/passed_record")
+    public String passedRecord(@RequestParam("student_id") String student_id,Model model) throws AppExceptions {
+        passReportList.clear();
+        detailsList.clear();
         Student student = studentInterface.findStudentById(student_id);
-        List<ExamsScore> scoreFromExamsScore;
-        List<ExamsScore> scoreFromRecordExamsScore = examsScoreInterface.examsScoreByStudentIdFromRecordExams(student,
+        List<ExamsScore> scoreFromExams = examsScoreInterface.examsScoreByStudentIdFromExams(student,
                 student.getClasses().getParentClass().getClass_department());
-        List<SBA> sbaFromSBA;
-        List<SBA> sbaFromRecordSBA = sbaInterface.sbaByStudentIdFromRecordSBA(student,
+        List<ExamsScore> scoreFromRecordTable = examsScoreInterface.examsScoreByStudentIdFromRecordExams(student,
+                student.getClasses().getParentClass().getClass_department());
+        List<SBA> sbaListFromRecordTable = sbaInterface.sbaByStudentIdFromRecordSBA(student,
+                student.getClasses().getParentClass().getClass_department());
+        List<SBA> sbaListFromSBA = sbaInterface.sbaByStudentIdFromSBA(student,
                 student.getClasses().getParentClass().getClass_department());
         List<ReportDetails> details = reportDetailInterface.detailsByStudentId(student);
-        CommonReportDetails commonReportDetails = new CommonReportDetails();
-        List<SubjectReportSummary> summaryList = new ArrayList<>();
-        List<TempSubjectSummary> subjectSummaries = new ArrayList<>();
-        SubjectReportSummary summary;
+        Map<DummyClass,List<SubjectReportSummary>> listMap = new HashMap<>();
         SBAConfig sbaConfig = new SBAConfig();
-        Report report;
-        double totalScore = 0;
-        ReportDetails details1 = new ReportDetails();
-        if (student.getStudent_status().equals(Student_Status.COMPLETED) && scoreFromRecordExamsScore.isEmpty()){
-            String message =
-                    """
-                    STUDENT HAS NO PASSED RECORD
-                    """;
-            throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.NOT_FOUND,message));
+        List<TempSubjectSummary> subjectSummaries = new ArrayList<>();
+        if (scoreFromExams.isEmpty() && scoreFromRecordTable.isEmpty()){
+            throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.NOT_FOUND,
+                    "NO RECORD FOUND"));
         }
-        if (student.getStudent_status().equals(Student_Status.ACTIVE)){
-            scoreFromExamsScore = examsScoreInterface.examsScoreByStudentIdFromExams(student,
-                    student.getClasses().getParentClass().getClass_department());
-            sbaFromSBA = sbaInterface.sbaByStudentIdFromSBA(student,student.getClasses().getParentClass().getClass_department());
-            if (scoreFromExamsScore.isEmpty() || scoreFromRecordExamsScore.isEmpty()){
-                String message =
-                        """
-                        STUDENT HAS NO PASSED RECORD
-                        """;
-                throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.NOT_FOUND,message));
-            }
-            for(ExamsScore examsScore : scoreFromExamsScore){
-                for (SBA sba : sbaFromSBA){
-                    if (sba.getMarksId().equals(examsScore.getExams_score_id())){
-                        subjectSummaries.add(new TempSubjectSummary(examsScore,sba));
-                    }
+        for (ExamsScore score : scoreFromExams){
+            for (SBA sba : sbaListFromSBA){
+                if (sba.getMarksId().equals(score.getExams_score_id())){
+                    subjectSummaries.add(new TempSubjectSummary(score,sba));
                 }
             }
         }
-        for(ExamsScore examsScore : scoreFromRecordExamsScore){
-            for (SBA sba : sbaFromRecordSBA){
-                if (sba.getMarksId().equals(examsScore.getExams_score_id())){
-                    subjectSummaries.add(new TempSubjectSummary(examsScore,sba));
+        for (ExamsScore score : scoreFromRecordTable){
+            for (SBA sba : sbaListFromRecordTable){
+                if (sba.getMarksId().equals(score.getExams_score_id())){
+                    subjectSummaries.add(new TempSubjectSummary(score,sba));
                 }
             }
         }
-        for (int i = 0; i < subjectSummaries.size(); i++) {
-            for (int j = i+1; j < subjectSummaries.size() ; j++) {
-                Department department;Academic_Year year;Term term;
-                double examsScore,classScore;
-                if ((!subjectSummaries.get(i).equals(new TempSubjectSummary())|| !subjectSummaries.get(j).equals(new TempSubjectSummary())) &&
-                        (subjectSummaries.get(i).getExamsScore().getExams_score_id().getTerm_id().equals(
-                        subjectSummaries.get(j).getExamsScore().getExams_score_id().getTerm_id()))&&
-                        (subjectSummaries.get(i).getExamsScore().getExams_score_id().getClass_id().equals(
-                                subjectSummaries.get(j).getExamsScore().getExams_score_id().getClass_id()))
+        for (TempSubjectSummary summary : subjectSummaries){
+            sbaConfig = sbaConfigInterface.findSBAConfigByDepartmentAndYear(student.getClasses().getParentClass().getClass_department(),
+                    summary.getExamsScore().getAcademic_year());
+            detailsList.add(commonDetailsInterface.findDetailsByClass_Term_Year(summary.getExamsScore().getAcademic_year(),
+                    summary.getExamsScore().getExams_score_id().getClass_id(), summary.getExamsScore().getExams_score_id().getTerm_id()));
+            Optional<Double> total = summary.getClassScore().getMarks().stream().reduce(Double::sum);
+            total = Optional.of(total.orElse(0.0)*(sbaConfig.getClasswork_scale()/100.0));
+            double totalScore = total.orElse(0.0)+(summary.getExamsScore().getMarks() *
+                    ((100 - sbaConfig.getClasswork_scale())/100.0));
+            if (!listMap.containsKey(new DummyClass(summary.getExamsScore().getExams_score_id().getClass_id(),
+                    summary.getExamsScore().getExams_score_id().getTerm_id()))){
+                List<SubjectReportSummary> list = new ArrayList<>();
+                list.add(new SubjectReportSummary(summary.getExamsScore().getExams_score_id().getSubject_id().shotSubjectName(),
+                        (summary.getExamsScore().getMarks()*((100 - sbaConfig.getClasswork_scale())/100.0)),total.orElse(0.0),totalScore,summary.getExamsScore().getPosition(),
+                        Help.remarks(totalScore),Help.grade(totalScore)));
+                listMap.put(new DummyClass(summary.getExamsScore().getExams_score_id().getClass_id(),
+                        summary.getExamsScore().getExams_score_id().getTerm_id()),
+                        list);
+            }else {
+                List<SubjectReportSummary> list = listMap.get(new DummyClass(summary.getExamsScore().getExams_score_id().getClass_id(),
+                        summary.getExamsScore().getExams_score_id().getTerm_id()));
+                list.add(new SubjectReportSummary(summary.getExamsScore().getExams_score_id().getSubject_id().shotSubjectName(),
+                        summary.getExamsScore().getMarks(),total.orElse(0.0),totalScore,summary.getExamsScore().getPosition(),
+                        Help.remarks(totalScore),Help.grade(totalScore)));
+            }
+        }
+        for (Map.Entry<DummyClass,List<SubjectReportSummary>> entry : listMap.entrySet()){
+            double total = 0;
+            int size = entry.getValue().size();
+            ReportDetails reportDetail = new ReportDetails();
+            reportDetail.setReportDetailsId(new ReportDetailsId(student,new Classes(),new Term()));
+            for (SubjectReportSummary summary : entry.getValue()){
+                total += summary.getTotal();
 
-                ){
-                    department = subjectSummaries.get(i).getExamsScore().getExams_score_id().getClass_id().getParentClass().getClass_department();
-                    year = subjectSummaries.get(i).getExamsScore().getAcademic_year();
-                    term = subjectSummaries.get(i).getExamsScore().getExams_score_id().getTerm_id();
-                    sbaConfig = sbaConfigInterface.findSBAConfigByDepartmentAndYear(department,year);
-                    Optional<Double> classScoreTotal = subjectSummaries.get(j).getClassScore().getMarks().stream().reduce(
-                            Double::sum);
-                    examsScore = subjectSummaries.get(j).getExamsScore().getMarks()*(100-sbaConfig.getClasswork_scale())/100;
-                    classScore = classScoreTotal.orElse(0.0) * sbaConfig.getClasswork_scale()/100;
-                    summary = new SubjectReportSummary(
-                            subjectSummaries.get(j).getExamsScore().getExams_score_id().getSubject_id().getSubject_name(),
-                            examsScore,classScore,(examsScore+classScore),subjectSummaries.get(j).getExamsScore().getPosition(),
-                            Help.remarks(examsScore+classScore),Help.grade(examsScore+classScore)
-                    );
-                    totalScore = totalScore + (examsScore+classScore);
-                    commonReportDetails = commonDetailsInterface.findDetailsByClass_Term_Year(year,
-                            subjectSummaries.get(j).getExamsScore().getExams_score_id().getClass_id(), term);
-                    summaryList.add(summary);
-                    if (!details1.equals(new ReportDetails())) {
-                        for (ReportDetails reportDetails : details) {
-                            if (reportDetails.getReportDetailsId().getTerm_id().equals(subjectSummaries.get(j).getExamsScore().getExams_score_id().getTerm_id()) &&
-                                    reportDetails.getReportDetailsId().getClass_id().equals(subjectSummaries.get(j).getExamsScore().getExams_score_id().getClass_id())) {
-                                details1 = reportDetails;
-                            }
-                        }
-                    }
-                    subjectSummaries.set(j,new TempSubjectSummary());
+            }
+            for (ReportDetails reportDetails : details){
+                if (reportDetails.getReportDetailsId().getClass_id().equals(entry.getKey().getClasses())&&
+                        reportDetails.getReportDetailsId().getTerm_id().equals(entry.getKey().getTerm())){
+                    reportDetail = reportDetails;
                 }
             }
-            report = new Report(student,student.getStudentFullName(),
-                    totalScore,0,totalScore/ summaryList.size(),details1,"",summaryList);
-            passReportList.add(report);
-            Help.aggregateScore(passReportList);
-            summaryList = new ArrayList<>();
-            int index = 0;
-            setModelForPassRecord(commonReportDetails,model,passReportList.get(index),sbaConfig,index+1);
+            passReportList.add(new Report(student,student.getStudentFullName(),total,0,(total/size),
+                    reportDetail,"",entry.getValue()));
         }
-        for (Subjects subjects : subjectInterface.findSubjectByTeacher(teacher)){
-            if (subjects.getOptions().equals(SubjectOptions.OPTIONAL)
-                    && ! subjects.getStudentSet().contains(student) ){
-                return "pass_report_no_sub";
-            }
-        }
+        Help.aggregateScore(passReportList,subjectInterface);
+        setModelForPassRecord(detailsList.get(0),model,passReportList.get(0),sbaConfig,1);
         return "pass_report";
     }
 
@@ -900,28 +870,6 @@ public class Teacher_Controller {
         model.addAttribute("index",index);
     }
 
-    private void passReportNextPrev(Report report,Model model,Integer index){
-        Department department = report.getReportDetails().getReportDetailsId().getClass_id().getParentClass().getClass_department();
-        Academic_Year year = report.getReportDetails().getAcademic_year();
-        Term term = report.getReportDetails().getReportDetailsId().getTerm_id();
-        Classes classes = report.getReportDetails().getReportDetailsId().getClass_id();
-        CommonReportDetails details = commonDetailsInterface.findDetailsByClass_Term_Year(year,classes,term);
-        SBAConfig config = sbaConfigInterface.findSBAConfigByDepartmentAndYear(department,year);
-        setModelForPassRecord(details,model,report,config,index);
-    }
-
-    @RequestMapping(value = "/prev_pass_report")
-    public String prev_pass_report(@RequestParam("index") Integer index,Model model) throws AppExceptions{
-        Report report;
-        if (index <=0){
-            String message = "END OF STUDENT RECORD";
-            throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.OK,message));
-        }else {
-            report = passReportList.get(--index);
-        }
-        passReportNextPrev(report,model,index);
-        return "pass_report";
-    }
 
     @RequestMapping(value = "/next_pass_report")
     public String next_pass_report(@RequestParam("index") Integer index,Model model) throws AppExceptions{
@@ -932,7 +880,10 @@ public class Teacher_Controller {
         }else {
             report = passReportList.get(index);
         }
-        passReportNextPrev(report,model,++index);
+        SBAConfig sbaConfig = sbaConfigInterface.findSBAConfigByDepartmentAndYear(
+                report.getStudent().getClasses().getParentClass().getClass_department(),
+                report.getReportDetails().getAcademic_year());
+        setModelForPassRecord(detailsList.get(index),model,report,sbaConfig,++index);
         return "pass_report";
     }
 
@@ -1034,7 +985,6 @@ public class Teacher_Controller {
         Student student = studentInterface.findStudentById(servletRequest.getParameter("stuId"));
         Integer index = Integer.parseInt(servletRequest.getParameter("idx"));
         Report report = new Report();
-        boolean found = false;
         for (Report report1 : reportFillingList){
             if (report1.getStudent().equals(student)){
                 report = report1;
@@ -1043,7 +993,7 @@ public class Teacher_Controller {
         if (student == null){
             String message = "STUDENT NOT FOUND";
             throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.NOT_FOUND,message));
-        } else if (!found) {
+        } else if (report.equals(new Report())) {
             String message = "STUDENT IS NOT IN "+ classes.getClass_name();
             throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.OK,message));
         }
@@ -1051,66 +1001,94 @@ public class Teacher_Controller {
         return "class_teacher_fill_report";
     }
 
-    // not complete yet
-    @RequestMapping(value = "/summary_report/{student_id}")
-    public String summaryReport(@PathVariable("student_id") String studentId,Model model) throws AppExceptions{
+    // fetch data by grouping it by term and class;
+    @RequestMapping(value = "/summary_report")
+    public String summaryReport(@RequestParam("student_id") String studentId,Model model) throws AppExceptions{
+        Student student = studentInterface.findStudentById(studentId);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String user_name = authentication.getName();
         Users users = userServiceInterface.getUser(user_name);
         Teacher teacher = teacherInterface.findTeacherByUsers(users);
-        Student student = studentInterface.findStudentById(studentId);
-        List<ExamsScore> examsScores = new ArrayList<>();
-        List<ExamsScore> examScoresFromRecordExams = new ArrayList<>();
-        List<ProgressReport> progressReportList = new ArrayList<>();
-        List<Subjects> subjectsList = subjectInterface.findSubjectByTeacher(teacher);
-        for (Subjects subjects :subjectsList) {
-            examsScores.addAll(examsScoreInterface.examsScoreByStudentAndSubject(student, subjects));
-            examScoresFromRecordExams.addAll(examsScoreInterface.examsScoreByStudentAndSubjectFromRecordExams
-                    (student, subjects));
-            ProgressReport report = new ProgressReport();
-            if (examsScores.isEmpty() && examScoresFromRecordExams.isEmpty())
-                throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.NOT_FOUND,
-                        "NO RECORD FOUND"));
-            else if (examsScores.isEmpty()) {
-                for (ExamsScore score : examScoresFromRecordExams) {
-                    List<Double> marks;
-                    if (report.getGraphData().containsKey(score.getExams_score_id().getClass_id().getClass_name())) {
-                        marks = report.getGraphData().get(score.getExams_score_id().getClass_id().getClass_name());
-                        marks.add(score.getMarks());
-                    } else {
-                        marks = new ArrayList<>();
-                        marks.add(score.getMarks());
-                    }
-                    report.getGraphData().put(score.getExams_score_id().getClass_id().getClass_name(), marks);
-                }
-            } else {
-                for (ExamsScore score : examScoresFromRecordExams) {
-                    List<Double> marks;
-                    if (report.getGraphData().containsKey(score.getExams_score_id().getClass_id().getClass_name())) {
-                        marks = report.getGraphData().get(score.getExams_score_id().getClass_id().getClass_name());
-                        marks.add(score.getMarks());
-                    } else {
-                        marks = new ArrayList<>();
-                    }
-                    report.getGraphData().put(score.getExams_score_id().getClass_id().getClass_name(), marks);
-                }
-                for (ExamsScore score : examsScores) {
-                    List<Double> marks;
-                    if (report.getGraphData().containsKey(score.getExams_score_id().getClass_id().getClass_name())) {
-                        marks = report.getGraphData().get(score.getExams_score_id().getClass_id().getClass_name());
-                        marks.add(score.getMarks());
-                    } else {
-                        marks = new ArrayList<>();
-                    }
-                    report.getGraphData().put(score.getExams_score_id().getClass_id().getClass_name(), marks);
-                }
-            }
-            report.getCategories().add("TERM ONE");
-            report.getCategories().add("TERM TWO");
-            report.getCategories().add("TERM THREE");
-            progressReportList.add(report);
+        List<Subjects> teacherSubjects = subjectInterface.findSubjectByTeacher(teacher);
+        List<ExamsScore> examsScores = new ArrayList<>(examsScoreInterface.examsScoreByStudentAndSubject(student, teacherSubjects.get(0)));
+        List<ExamsScore> recordScores = new ArrayList<>(examsScoreInterface.examsScoreByStudentAndSubjectFromRecordExams(student, teacherSubjects.get(0)));
+        Map<Classes, List<TermRecords>> map = new HashMap<>();
+        if (examsScores.size() == 0 && recordScores.size() ==0){
+            throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.NOT_FOUND,
+                    "NO RECORD OF STUDENT FOUND"));
         }
-        model.addAttribute("graph",progressReportList);
-        return "";
+        if ((examsScores.size() != 0) && recordScores.size() == 0) {
+            examsScores.forEach(examsScore -> {
+                if (!map.containsKey(examsScore.getExams_score_id().getClass_id())){
+                    List<TermRecords> termRecords = new ArrayList<>();
+                    termRecords.add(new TermRecords(examsScore.getExams_score_id().getTerm_id().getTerm_name(),
+                           examsScore.getMarks()));
+                    map.put(examsScore.getExams_score_id().getClass_id(), termRecords);
+                }else {
+                    List<TermRecords> termRecords1 = map.get(examsScore.getExams_score_id().getClass_id());
+                    termRecords1.add(new TermRecords(examsScore.getExams_score_id().getTerm_id().getTerm_name(),
+                            examsScore.getMarks()));
+                    map.put(examsScore.getExams_score_id().getClass_id(), termRecords1);
+                }
+            });
+        }
+        else if (examsScores.size() == 0) {
+            recordScores.forEach(record ->{
+                List<TermRecords> list;
+                if (!map.containsKey(record.getExams_score_id().getClass_id())){
+                    list = new ArrayList<>();
+                }else {
+                    list = map.get(record.getExams_score_id().getClass_id());
+                }
+                list.add(new TermRecords(record.getExams_score_id().getTerm_id().getTerm_name(),record.getMarks()));
+                map.put(record.getExams_score_id().getClass_id(), list);
+            });
+        }else {
+            examsScores.forEach(examsScore -> {
+                if (!map.containsKey(examsScore.getExams_score_id().getClass_id())){
+                    List<TermRecords> termRecords = new ArrayList<>();
+                    termRecords.add(new TermRecords(examsScore.getExams_score_id().getTerm_id().getTerm_name(),
+                            examsScore.getMarks()));
+                    map.put(examsScore.getExams_score_id().getClass_id(), termRecords);
+                }else {
+                    List<TermRecords> termRecords1 = map.get(examsScore.getExams_score_id().getClass_id());
+                    termRecords1.add(new TermRecords(examsScore.getExams_score_id().getTerm_id().getTerm_name(),
+                            examsScore.getMarks()));
+                    map.put(examsScore.getExams_score_id().getClass_id(), termRecords1);
+                }
+            });
+            recordScores.forEach(record ->{
+                List<TermRecords> list;
+                if (!map.containsKey(record.getExams_score_id().getClass_id())){
+                    list = new ArrayList<>();
+                }else {
+                    list = map.get(record.getExams_score_id().getClass_id());
+                }
+                list.add(new TermRecords(record.getExams_score_id().getTerm_id().getTerm_name(),record.getMarks()));
+                map.put(record.getExams_score_id().getClass_id(), list);
+            });
+        }
+        List<TermRecords> seriesList = new ArrayList<>();
+        List<String> categories = new ArrayList<>();
+        for (Map.Entry<Classes,List<TermRecords>> entry : map.entrySet()){
+            List<Double> doubleList = new ArrayList<>();
+            for (TermRecords termRecords : entry.getValue()){
+                doubleList.add(termRecords.getMark());
+                categories.add(termRecords.getTerm());
+            }
+            seriesList.add(new TermRecords(entry.getKey().getClass_name(),doubleList));
+
+        }
+        for (int i = 0; i < categories.size(); i++) {
+            if (i > 2)
+                categories.remove(categories.get(i));
+        }
+        model.addAttribute("next");
+        model.addAttribute("index",(teacherSubjects.size() == 1)? 0 : teacherSubjects.get(1).getSubject_id());
+        model.addAttribute("student",student.getStudent_id());
+        model.addAttribute("teacher",teacher.getTeacher_id());
+        model.addAttribute("category",categories);
+        model.addAttribute("series",seriesList);
+        return "summaryReport";
     }
 }

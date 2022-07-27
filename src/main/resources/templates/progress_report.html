@@ -12,6 +12,7 @@
     <div id="main_content">
         <div id="nav-bar">
             <ul id="nav-link">
+                <li><h3 style="color: white">TERMINAL REPORT</h3></li>
                 <li><a th:href="@{/teacher_home_page}">HOME</a></li>
                 <li><a th:href="@{/logout}">LOGOUT</a></li>
             </ul>
@@ -26,12 +27,8 @@
                     <button type="submit" class="btn btn-outline-secondary">Search</button>
                 </form>
             </div>
-            <div> <a th:href="@{/summary_report/{student_id}(student_id=${report.getStudent().getStudent_id()})}"
-                     class="btn btn-primary">Progress Report</a></div>
-            <div><a th:href="@{/passed_record/{student_id}(student_id=${report.getStudent().getStudent_id()})}"
-                    class="btn btn-primary">Passed term Report</a></div>
         </div>
-        <div id="report">
+        <div id="report" style="border: 1px solid black; padding: 10px">
             <div id="sch_info">
                 <img src="logo.jpg" alt="sch_logo" style="margin-right: 30px;">
                 <div style="text-align: center;">
@@ -199,7 +196,7 @@
         <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: 10px;" id="btn">
             <div><a th:href="@{/prev(trm=${term.getTerm_id()},cls=${class.getClass_id()},index=${index})}"
                     class="btn btn-primary">PREV</a></div>
-            <div style="padding-right: 200px;"><a th:href="@{/next(trm=${term.getTerm_id()},cls=${class.getClass_id()},
+            <div style="padding-left: 200px;"><a th:href="@{/next(trm=${term.getTerm_id()},cls=${class.getClass_id()},
             index=${index})}" class="btn btn-primary">NEXT</a></div>
         </div>
     </div>

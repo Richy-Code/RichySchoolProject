@@ -39,7 +39,17 @@ body{
     width: 150px;
 }
 
-#subject-title, h3{
+#nav-link li:not(:first-child):hover{
+    border: solid 1px rgb(39, 93, 43);
+    background-color: rgb(39, 93, 43);
+    height: 35px;
+    width: 150px;
+    text-align: center;
+    padding-top: 5px;
+    border-radius: 5px;
+}
+
+#subject-title, h5{
     font-weight: bold;
     text-align: center;
     text-decoration: underline;

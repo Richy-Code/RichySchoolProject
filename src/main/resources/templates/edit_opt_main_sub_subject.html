@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{exams_home_page.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <script th:src="@{jquery-3.6.0.js}" type="text/javascript"></script>
+    <title>SUBJECTS</title>
+</head>
+<body>
+<div id="main-content">
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><h3 style="color: white;">EDIT SUB SUBJECTS</h3></li>
+            <li><a th:href="@{/admin}">HOME</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    <div id="section-two">
+        <div style="text-align: center; width: auto;">
+            <h1 style="font-weight: bold;" th:text="'EDIT SUB SUBJECTS OF ' + ${optSubject.getOpt_sub_name()}"></h1>
+            <form action="/save_edited_opt_sub_subject" style="margin-top: 10px;" th:object="${subList}">
+                <input type="hidden" th:value="${optSubject.getOpt_sub_id()}" name="optId">
+                <table>
+                    <tbody th:each="sub,item : *{subSubjectList}">
+                    <tr>
+                        <td class="right">SUBJECT NAME</td>
+                        <td class="left">
+                            <input type="hidden" th:value="${sub.getSubject_id()}"
+                                   th:field="*{subSubjectList[__${item.index}__].subject_id}">
+                            <input type="text" class="form-control" required
+                                   th:field="*{subSubjectList[__${item.index}__].subject_name}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="right">TEACHER ASSIGNED</td>
+                        <td class="left">
+                            <select  th:id="'tch'+${item.index}" required class="form-select"
+                                     th:field="*{subSubjectList[__${item.index}__].teacher_assigned.teacher_id}">
+                                <option th:each="tchs : ${tch}" th:value="${tchs.getTeacher_id()}"
+                                        th:text="${tchs.getFullName()}"></option>
+                            </select>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <input type="submit" value="SUBMIT" class="btn btn-primary btn-lg" style="margin-top: 30px;">
+            </form>
+        </div>
+    </div>
+</div>
+<script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

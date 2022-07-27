@@ -23,6 +23,7 @@
     border: solid 1px black;
     padding: 10px;
     width: 100%;
+    margin-top: 15px;
 }
 
 .right{
@@ -78,4 +79,8 @@
 
  #final td input{
     border: none;
+ }
+
+ #btn-prev-next,#section-two,#btn{
+     visibility: hidden;
  }

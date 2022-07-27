@@ -35,10 +35,10 @@
                             STUDENT</h6>
                     </div>
                     <div style="align-self: center; margin-top: 20px;">
-                        <a th:href="@{/passed_record/{student_id}(student_id=${student.getStudent_id()})}" class="btn btn-dark btn-lg">TERMINAL REPORT</a>
+                        <a th:href="@{/passed_record(student_id=${student.getStudent_id()})}" class="btn btn-dark btn-lg">TERMINAL REPORT</a>
                     </div>
                     <div style="align-self: center; margin-top: 20px;">
-                        <a th:href="@{/summary_report/{student_id}(student_id=${student.getStudent_id()})}" class="btn btn-dark btn-lg">PROGRESS REPORT</a>
+                        <a th:href="@{/summary_report(student_id=${student.getStudent_id()})}" class="btn btn-dark btn-lg">PROGRESS REPORT</a>
                     </div>
                 </div>
             </div>

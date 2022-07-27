@@ -46,7 +46,7 @@
                 <tbody>
                     <tr th:each="subStu,item : *{subjectStudents}">
                         <input type="hidden" th:value="*{subjectStudents[__${item.index}__].getStudent().getStudent_id()}"
-                        th:field="*{subjectStudents[__${item.index}__].getStudent().student_id}">
+                        th:field="*{subjectStudents[__${item.index}__].student.student_id}">
                         <td th:text="*{subjectStudents[__${item.index}__].getStudent().getFullName()}"></td>
                         <td th:text="*{subjectStudents[__${item.index}__].getStudent().getStudent_id()}"></td>
                         <td th:each="sub : ${optSubject}">
@@ -54,6 +54,7 @@
                                    required th:value="${sub.getSubject_id()}"></td>
                     </tr>
             </table>
+            <div style="text-align: center"><input type="submit" value="SUBMIT" class="btn btn-primary"></div>
         </form>
     </div>
     <script th:src="@{bootstrap_js.js}"></script>

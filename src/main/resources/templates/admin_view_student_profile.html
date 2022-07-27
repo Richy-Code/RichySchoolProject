@@ -35,13 +35,16 @@
                             STUDENT</h6>
                     </div>
                     <div style="align-self: center; margin-top: 20px;">
-                        <a th:href="@{/edite_student_profile(stu=${student.getStudent_id()})}" class="btn btn-dark btn-lg">Edit Details</a>
+                        <th:block th:switch="${student.getStudent_status()}">
+                            <a th:case="${active}" th:href="@{/edite_student_profile(stu=${student.getStudent_id()})}" class="btn btn-dark btn-lg">Edit Details</a>
+                            <a th:case="${completed}" aria-disabled="true" class="btn btn-dark btn-lg">Edit Details</a>
+                        </th:block>
                     </div>
                     <div style="align-self: center; margin-top: 20px;">
-                        <a th:href="@{/head_passed_record/{student_id}(student_id=${student.getStudent_id()})}" class="btn btn-dark btn-lg">TERMINAL REPORT</a>
+                        <a th:href="@{/head_passed_record(student_id=${student.getStudent_id()})}" class="btn btn-dark btn-lg">TERMINAL REPORT</a>
                     </div>
                     <div style="align-self: center; margin-top: 20px;">
-                        <a th:href="@{/summary_report/{student_id}(student_id=${student.getStudent_id()})}" class="btn btn-dark btn-lg">PROGRESS REPORT</a>
+                        <a th:href="@{/head_summary_report(student_id=${student.getStudent_id()})}" class="btn btn-dark btn-lg">PROGRESS REPORT</a>
                     </div>
                 </div>
             </div>

@@ -15,4 +15,6 @@ public interface OptionalSubjectInterface {
     OptionalSubject findOptSubjectById(Long subjectId);
 
     OptionalSubject findMainOptSubject(Long subject);
+
+    void deleteOptionalSubjects(OptionalSubject subject);
 }

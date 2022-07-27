@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 public class OptionalSubjectStudents {
     private Student student;
     private Long optSubjectId;
-
     public OptionalSubjectStudents(Student student) {
         this.student = student;
     }

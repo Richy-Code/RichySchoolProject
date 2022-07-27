@@ -20,7 +20,8 @@
 <body>
     <div id="nav-bar">
         <ul id="nav-link">
-            <li><a th:href="@{/teacher_home_page}"></a></li>
+            <li><h3 style="color: white">ASSESSMENT</h3></li>
+            <li><a th:href="@{/teacher_home_page}">HOME</a></li>
             <li><a th:href="@{/exams_page(trm=${term.getTerm_id()},cls=${class.getClass_id()}
             ,sub=${subject.getSubject_id()})}">EXAMS ENTRY</a></li>
             <li><a th:href="@{/terminal_report(trm=${term.getTerm_id()},cls=${class.getClass_id()}
@@ -61,6 +62,7 @@
                         <th:block>
                             <td th:each="cls_mark,it : *{sbaEntries[__${items.index}__].getClass_work()}">
                                 <input type="number" min="0" step="any" required class="exams_control"
+                                       th:max="${sba_config.getMaximum_class_work_mark().get((it.index))}"
                                        th:value="${cls_mark}" th:field="*{sbaEntries[__${items.index}__].class_work[__${it.index}__]}"></td>
                         </th:block>
                         <td th:text="*{sbaEntries[__${items.index}__].getTotal()}"></td>

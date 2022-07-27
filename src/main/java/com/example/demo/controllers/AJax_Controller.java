@@ -7,6 +7,7 @@ import com.example.demo.entities.Department;
 import com.example.demo.entities.Subjects;
 import com.example.demo.entities.Teacher;
 import com.example.demo.enum_entities.Student_Status;
+import com.example.demo.methods.Help;
 import com.example.demo.services.service_interface.ClassesInterface;
 import com.example.demo.services.service_interface.DepartmentInterface;
 import com.example.demo.services.service_interface.SubjectInterface;
@@ -90,42 +91,6 @@ public class AJax_Controller {
         }
         teachers.forEach(teacher -> ajaxTeachers.add(new AjaxTeacher(teacher.getTeacher_id(),
                 teacher.getStaffFullName())));
-        try {
-            return new ResponseEntity<>(ajaxTeachers,HttpStatus.OK);
-        }catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @RequestMapping(
-            value = "update_possible_teacher/{teacherId}",
-            method = RequestMethod.GET,
-            produces = {MimeTypeUtils.APPLICATION_JSON_VALUE}
-    )
-    public ResponseEntity<List<AjaxTeacher>> updatedPossibleTeacher(@PathVariable("teacherId")
-                                                                    String teacherId){
-        Teacher teacher = teacherInterface.findTeacherByID(Long.parseLong(teacherId));
-        List<Teacher> teacherList = teacherInterface.teacherByDepartment(teacher.getDepartment_Id(),
-                Student_Status.ACTIVE);
-        List<Subjects> subjectsList = subjectInterface.subjectByDepartment(teacher.getDepartment_Id(),
-                Student_Status.ACTIVE);
-        List<AjaxTeacher> ajaxTeachers = new ArrayList<>();
-        Map<Teacher,Integer> map = new HashMap<>();
-        for (Subjects subjects : subjectsList){
-            if (! map.containsKey(subjects.getTeacher_assigned())){
-                map.put(subjects.getTeacher_assigned(),1);
-            }else {
-                map.put(subjects.getTeacher_assigned(),map.get(subjects.getTeacher_assigned())+1);
-            }
-        }
-        map.put(teacher,map.get(teacher)+1);
-        for (Map.Entry<Teacher, Integer> entries : map.entrySet()){
-            if (entries.getValue() >= 2){
-                teacherList.remove(entries.getKey());
-            }
-        }
-        teacherList.forEach(teacher1 -> ajaxTeachers.add(new AjaxTeacher(teacher.getTeacher_id(),
-                teacher1.getStaffFullName())));
         try {
             return new ResponseEntity<>(ajaxTeachers,HttpStatus.OK);
         }catch (Exception e){

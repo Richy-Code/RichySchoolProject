@@ -6,12 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" th:href="@{view_student_profile.css}">
     <link rel="stylesheet" th:href="@{bootstrap_css.css}">
-    <title>Document</title>
+    <title>MAIN CLASS</title>
 </head>
 <body>
     <div id="nav-bar">
         <ul id="nav-link">
-            <li><h3 style="color: white;">PARENT CLASS PROFILE</h3></li>
+            <li><h3 style="color: white;">MAIN CLASS PROFILE</h3></li>
             <li><a th:href="@{/admin}">HOME</a></li>
             <li><a th:href="@{/logout}">LOGOUT</a></li>
         </ul>
@@ -33,7 +33,7 @@
                     </div>
                     <div style="align-self: center; margin-top: 20px;">
                         <div><a th:href="@{/merge_parent_class(parent=${parentClass.getParentClassId()})}" class="btn btn-dark btn-lg">MERGE</a></div>
-                        <div style="margin-top: 10px;"><a th:href="@{/split_parent_class(parent=${parentClass.getParentClassId()})}" class="btn btn-dark btn-lg">SPLIT</a></div>
+                        <div style="margin-top: 10px; margin-left: 10px"><a th:href="@{/split_parent_class(parent=${parentClass.getParentClassId()})}" class="btn btn-dark btn-lg">SPLIT</a></div>
                     </div>
                 </div>
             </div>
@@ -74,8 +74,7 @@
                     <div style="display: flex; border-bottom:solid 3px rgb(225, 225, 225); width: 100%;text-align: left;">
                         <div style="padding-left: 10px; padding-top: 20px;"> 
                             <h4 style="color: rgb(173, 188, 205);">SUB CLASSES</h4>
-                            <h5 style="display: flex;color: rgb(53, 131, 169);" th:text="${
-                                #strings.listJoin(classes,', ')}"></h5>
+                            <h5 style="display: flex;color: rgb(53, 131, 169);" th:text="${#strings.listJoin(classes,', ')}"></h5>
                         </div>
                     </div>
                 </div>

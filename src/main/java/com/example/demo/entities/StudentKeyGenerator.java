@@ -44,9 +44,9 @@ public class StudentKeyGenerator implements IdentifierGenerator, Configurable {
             throw new RuntimeException(e);
         }
         if ((max + 1) <10)
-            suffix = String.format("%02d",(max+1));
+            suffix = String.format("%03d",(max+1));
         else if ((max + 1) < 100) {
-            suffix = String.format("%01d",(max + 1));
+            suffix = String.format("%02d",(max + 1));
         }else
             suffix = String.valueOf((max + 1));
 

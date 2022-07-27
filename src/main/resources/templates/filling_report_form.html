@@ -12,12 +12,14 @@
 <div id="main-content">
     <div id="nav-bar">
         <ul id="nav-link">
+            <li><h3 style="color: white">FILL REPORT</h3></li>
             <li><a th:href="@{/teacher_home_page}">HOME</a></li>
             <li><a th:href="@{/logout}">LOGOUT</a></li>
         </ul>
     </div>
     <div id="section-two">
         <div style="text-align: center; width: auto;">
+            <div style="font-weight: bold;text-align: center"><h3>FILL REPORT</h3></div>
             <form action="/report_filling">
                 <input type="hidden" name="cls" th:value="${class_id}">
                 <table>

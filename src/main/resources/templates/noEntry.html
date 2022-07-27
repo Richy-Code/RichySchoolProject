@@ -32,7 +32,7 @@
             <tbody style="text-align: center;">
             <tr th:each="clss : ${cls}">
                 <td th:text="${clss.getClass_name()}"></td>
-                <td th:text="${clss.getParentClass().getClass_department().getDepartment_name()}"></td>
+                <td th:text="${clss.getClass_teacher_id().getDepartment_Id().getDepartment_name()}"></td>
                 <td th:text="${clss.getClass_teacher_id().getFullName()}"></td>
             </tr>
         </table>

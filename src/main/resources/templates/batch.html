@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{batch.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>UPLOAD FILE</title>
+</head>
+<body>
+    <div id="main-content">
+        <div id="nav-bar">
+            <ul id="nav-link">
+                <li><h3 style="color: white;">ADD STUDENTS</h3></li>
+                <li><a th:href="@{/admin}">HOME</a></li>
+                <li><a th:href="@{/logout}">LOGOUT</a></li>
+            </ul>
+        </div>
+        <div id="section-two">
+            <div><h3>UPLOADED FILE MUST STRICTLY FOLLOW THE FORMAT SHOWN</h3></div>
+            <div style="text-align: center;"><a th:href="@{/batch_student_form}" class="btn btn-primary">NEXT</a></div>
+            <div style="align-self: center; margin-top: 5px;">
+                <img src="fmat2.PNG" alt="" width="900px">
+            </div>
+        </div>
+    
+    </div>
+    <script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>
