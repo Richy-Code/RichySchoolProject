@@ -1,6 +1,5 @@
 package com.example.demo.repository;
 
-import com.example.demo.binding_entities.SummaryReport;
 import com.example.demo.entities.*;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

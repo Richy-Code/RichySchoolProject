@@ -36,7 +36,7 @@
                     </div>
                     <div style="align-self: center; margin-top: 20px;">
                         <th:block th:switch="${student.getStudent_status()}">
-                            <a th:case="${active}" th:href="@{/edite_student_profile(stu=${student.getStudent_id()})}" class="btn btn-dark btn-lg">Edit Details</a>
+                            <a th:case="${active}" th:href="@{/edit_student_profile(stu=${student.getStudent_id()})}" class="btn btn-dark btn-lg">Edit Details</a>
                             <a th:case="${completed}" aria-disabled="true" class="btn btn-dark btn-lg">Edit Details</a>
                         </th:block>
                     </div>

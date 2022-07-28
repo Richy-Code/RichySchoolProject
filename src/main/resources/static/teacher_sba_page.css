@@ -23,16 +23,6 @@ body{
     color: white;
 }
 
-#nav-link li:hover{
-    border: solid 1px rgb(39, 93, 43);
-    background-color: rgb(39, 93, 43);
-    height: 35px;
-    width: 150px;
-    text-align: center;
-    padding-top: 5px;
-    border-radius: 5px;
-}
-
 #nav-link li:hover #nav-link li a{
     height: 35px;
     width: 150px;

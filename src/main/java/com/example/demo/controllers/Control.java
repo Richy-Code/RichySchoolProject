@@ -1604,7 +1604,8 @@ public class Control {
         Map<String, Map<String,List<TermRecords>>> listMap = new HashMap<>();
         List<String> subjectName = new ArrayList<>();
         List<String> categories = new ArrayList<>();
-        List<TermRecords> seriesList = new ArrayList<>();
+        List<TermRecords> series = new ArrayList<>();
+        List<List<TermRecords>> seriesList = new ArrayList<>();
         for (SummaryReport report : summaryReports) {
             Map<String, List<TermRecords>> map;
             if (!listMap.containsKey(report.getSubjectName())) {
@@ -1640,14 +1641,15 @@ public class Control {
                     categories.add(report.getTerm());
                     doubleList.add(report.getMark());
                 }
-                seriesList.add(new TermRecords(listEntry.getKey(),doubleList));
+                series.add(new TermRecords(listEntry.getKey(),doubleList));
             }
+            seriesList.add(series);
+            series = new ArrayList<>();
         }
         for (int i = 0; i < categories.size(); i++) {
             if (i > 2)
                 categories.remove(categories.get(i));
         }
-        System.out.println(seriesList);
         model.addAttribute("category",categories);
         model.addAttribute("series",seriesList);
         model.addAttribute("subject",subjectName);

@@ -1010,83 +1010,74 @@ public class Teacher_Controller {
         Users users = userServiceInterface.getUser(user_name);
         Teacher teacher = teacherInterface.findTeacherByUsers(users);
         List<Subjects> teacherSubjects = subjectInterface.findSubjectByTeacher(teacher);
-        List<ExamsScore> examsScores = new ArrayList<>(examsScoreInterface.examsScoreByStudentAndSubject(student, teacherSubjects.get(0)));
-        List<ExamsScore> recordScores = new ArrayList<>(examsScoreInterface.examsScoreByStudentAndSubjectFromRecordExams(student, teacherSubjects.get(0)));
-        Map<Classes, List<TermRecords>> map = new HashMap<>();
+        List<ExamsScore> examsScores = new ArrayList<>();
+        List<ExamsScore> recordScores = new ArrayList<>();
+        teacherSubjects.forEach(subjects -> {
+            examsScores.addAll(examsScoreInterface.examsScoreByStudentAndSubject(student, subjects));
+            recordScores.addAll(examsScoreInterface.examsScoreByStudentAndSubjectFromRecordExams(student, subjects));
+        });
+        Map<Subjects, Map<Classes,List<TermRecords>>> map = new HashMap<>();
         if (examsScores.size() == 0 && recordScores.size() ==0){
             throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.NOT_FOUND,
                     "NO RECORD OF STUDENT FOUND"));
         }
-        if ((examsScores.size() != 0) && recordScores.size() == 0) {
-            examsScores.forEach(examsScore -> {
-                if (!map.containsKey(examsScore.getExams_score_id().getClass_id())){
-                    List<TermRecords> termRecords = new ArrayList<>();
-                    termRecords.add(new TermRecords(examsScore.getExams_score_id().getTerm_id().getTerm_name(),
-                           examsScore.getMarks()));
-                    map.put(examsScore.getExams_score_id().getClass_id(), termRecords);
-                }else {
-                    List<TermRecords> termRecords1 = map.get(examsScore.getExams_score_id().getClass_id());
-                    termRecords1.add(new TermRecords(examsScore.getExams_score_id().getTerm_id().getTerm_name(),
-                            examsScore.getMarks()));
-                    map.put(examsScore.getExams_score_id().getClass_id(), termRecords1);
-                }
-            });
-        }
-        else if (examsScores.size() == 0) {
-            recordScores.forEach(record ->{
-                List<TermRecords> list;
-                if (!map.containsKey(record.getExams_score_id().getClass_id())){
-                    list = new ArrayList<>();
-                }else {
-                    list = map.get(record.getExams_score_id().getClass_id());
-                }
-                list.add(new TermRecords(record.getExams_score_id().getTerm_id().getTerm_name(),record.getMarks()));
-                map.put(record.getExams_score_id().getClass_id(), list);
-            });
-        }else {
-            examsScores.forEach(examsScore -> {
-                if (!map.containsKey(examsScore.getExams_score_id().getClass_id())){
-                    List<TermRecords> termRecords = new ArrayList<>();
-                    termRecords.add(new TermRecords(examsScore.getExams_score_id().getTerm_id().getTerm_name(),
-                            examsScore.getMarks()));
-                    map.put(examsScore.getExams_score_id().getClass_id(), termRecords);
-                }else {
-                    List<TermRecords> termRecords1 = map.get(examsScore.getExams_score_id().getClass_id());
-                    termRecords1.add(new TermRecords(examsScore.getExams_score_id().getTerm_id().getTerm_name(),
-                            examsScore.getMarks()));
-                    map.put(examsScore.getExams_score_id().getClass_id(), termRecords1);
-                }
-            });
-            recordScores.forEach(record ->{
-                List<TermRecords> list;
-                if (!map.containsKey(record.getExams_score_id().getClass_id())){
-                    list = new ArrayList<>();
-                }else {
-                    list = map.get(record.getExams_score_id().getClass_id());
-                }
-                list.add(new TermRecords(record.getExams_score_id().getTerm_id().getTerm_name(),record.getMarks()));
-                map.put(record.getExams_score_id().getClass_id(), list);
-            });
-        }
-        List<TermRecords> seriesList = new ArrayList<>();
-        List<String> categories = new ArrayList<>();
-        for (Map.Entry<Classes,List<TermRecords>> entry : map.entrySet()){
-            List<Double> doubleList = new ArrayList<>();
-            for (TermRecords termRecords : entry.getValue()){
-                doubleList.add(termRecords.getMark());
-                categories.add(termRecords.getTerm());
+        examsScores.forEach(examsScore -> {
+            if (!map.containsKey(examsScore.getExams_score_id().getSubject_id())){
+                List<TermRecords> termRecords = new ArrayList<>();
+                termRecords.add(new TermRecords(examsScore.getExams_score_id().getTerm_id().getTerm_name(),
+                        examsScore.getMarks()));
+                Map<Classes,List<TermRecords>> listMap = new HashMap<>();
+                listMap.put(examsScore.getExams_score_id().getClass_id(), termRecords);
+                map.put(examsScore.getExams_score_id().getSubject_id(), listMap);
+            }else {
+                Map<Classes,List<TermRecords>> listMap = map.get(examsScore.getExams_score_id().getSubject_id());
+                List<TermRecords> termRecords = listMap.get(examsScore.getExams_score_id().getClass_id());
+                termRecords.add(new TermRecords(examsScore.getExams_score_id().getTerm_id().getTerm_name(),
+                        examsScore.getMarks()));
+                listMap.put(examsScore.getExams_score_id().getClass_id(), termRecords);
+                map.put(examsScore.getExams_score_id().getSubject_id(), listMap);
             }
-            seriesList.add(new TermRecords(entry.getKey().getClass_name(),doubleList));
-
+        });
+        recordScores.forEach(record ->{
+            if (!map.containsKey(record.getExams_score_id().getSubject_id())){
+                List<TermRecords> termRecords = new ArrayList<>();
+                termRecords.add(new TermRecords(record.getExams_score_id().getTerm_id().getTerm_name(),
+                        record.getMarks()));
+                Map<Classes,List<TermRecords>> listMap = new HashMap<>();
+                listMap.put(record.getExams_score_id().getClass_id(), termRecords);
+                map.put(record.getExams_score_id().getSubject_id(), listMap);
+            }else {
+                Map<Classes,List<TermRecords>> listMap = map.get(record.getExams_score_id().getSubject_id());
+                List<TermRecords> termRecords = listMap.get(record.getExams_score_id().getClass_id());
+                termRecords.add(new TermRecords(record.getExams_score_id().getTerm_id().getTerm_name(),
+                        record.getMarks()));
+                listMap.put(record.getExams_score_id().getClass_id(), termRecords);
+                map.put(record.getExams_score_id().getSubject_id(), listMap);
+            }
+        });
+        List<List<TermRecords>> seriesList = new ArrayList<>();
+        List<TermRecords> series = new ArrayList<>();
+        List<String> categories = new ArrayList<>();
+        List<String> subjectNames = new ArrayList<>();
+        for (Map.Entry<Subjects, Map<Classes,List<TermRecords>>> entry : map.entrySet()){
+            subjectNames.add(entry.getKey().getSubject_name());
+             Map<Classes,List<TermRecords>> listMap = entry.getValue();
+             for (Map.Entry<Classes,List<TermRecords>> listEntry : listMap.entrySet()) {
+                 List<Double> doubleList = new ArrayList<>();
+                 for (TermRecords termRecords : listEntry.getValue()){
+                     categories.add(termRecords.getTerm());
+                     doubleList.add(termRecords.getMark());
+                 }
+                 series.add(new TermRecords(listEntry.getKey().getClass_name(),doubleList));
+             }
+             seriesList.add(series);
+             series = new ArrayList<>();
         }
         for (int i = 0; i < categories.size(); i++) {
             if (i > 2)
                 categories.remove(categories.get(i));
         }
-        model.addAttribute("next");
-        model.addAttribute("index",(teacherSubjects.size() == 1)? 0 : teacherSubjects.get(1).getSubject_id());
-        model.addAttribute("student",student.getStudent_id());
-        model.addAttribute("teacher",teacher.getTeacher_id());
+        model.addAttribute("subjects", subjectNames);
         model.addAttribute("category",categories);
         model.addAttribute("series",seriesList);
         return "summaryReport";

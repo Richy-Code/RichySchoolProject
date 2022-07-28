@@ -161,7 +161,8 @@ public class Help {
                         Optional<String> grade = Optional.ofNullable(summary.getGrade());
                         aggregate += Integer.parseInt(grade.orElse("0"));
                     }else {
-                        best.add(Integer.parseInt(summary.getGrade()));
+                        Optional<String> grade = Optional.ofNullable(summary.getGrade());
+                        best.add(Integer.parseInt(grade.orElse("0")));
                     }
                 }
             }

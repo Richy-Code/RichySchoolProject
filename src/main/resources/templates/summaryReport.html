@@ -19,15 +19,11 @@
         </div>
     </div>
     <div style="text-align: center; text-decoration:underline; font-weight:bold; margin-top: 10px;"><h1>STUDENT SUMMARY PROGRESS CHART</h1></div>
-    <div class="container" >
-        <div th:id="'container'" >
+    <div class="main" style="display: flex; justify-content: space-evenly; margin-top: 10px">
+        <th:block th:each="sub,item : ${subjects}">
+            <div th:id="'container'+${item.index}" style="height: 400px; width: 550px" >
 
-        </div>
-    </div>
-    <div style="text-align: center;margin-top: 10px">
-        <th:block th:switch="${index}">
-            <a th:case="${0}" th:href="@{/}" class="btn btn-primary" style="visibility: hidden">NEXT SUB</a>
-            <a th:case="*" th:href="@{/nextSummary(index=${index},stu=${student},tch=${teacher})}" class="btn btn-primary" style="visibility: visible">NEXT SUB</a>
+            </div>
         </th:block>
     </div>
     <script th:src="@{bootstrap_js.js}"></script>
@@ -35,7 +31,8 @@
     <script th:src="@{highcharts.js}"></script>
     <script th:inline="javascript">
         $(function (){
-            Highcharts.chart('container', {
+            /*[# th:each="sub,item : ${subjects}"]*/
+            Highcharts.chart('container[[${item.index}]]', {
                 chart: {
                     type: 'column'
                 },
@@ -43,12 +40,12 @@
                     text: 'STUDENT PROGRESS REPORT CHART'
                 },
                 subtitle: {
-                    text: 'BASED ON EXAMS MARK'
+                    text: 'BASED ON EXAMS OF [[${sub}]]'
                 },
                 xAxis: {
                     categories: [
                         /*[# th:each="cat : ${category}"]*/
-                            [[${cat}]],
+                        [[${cat}]],
                         /*[/]*/
                     ],
                     crosshair: true
@@ -73,15 +70,15 @@
                         borderWidth: 0
                     }
                 },
-                series: [  /*[# th:each="row : ${series}"]*/
+                series: [  /*[# th:each="row : ${series.get((item.index))}"]*/
                     {
                         name: [[${row.getTerm()}]],
                         data: [[${row.getGraphData()}]]
 
-                },  /*[/]*/
+                    },  /*[/]*/
                 ]
             });
-
+            /*[/]*/
         })
     </script>
 </body>

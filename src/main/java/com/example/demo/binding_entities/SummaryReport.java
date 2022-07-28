@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 public class SummaryReport {
     private String subjectName;
     private String className;
-
     private String termName;
     private double marks;
 }
