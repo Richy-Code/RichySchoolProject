@@ -46,7 +46,6 @@
                     <input type="hidden" th:value="${sub.getSubject_id()}" th:field="*{subject_id}">
                     <input type="hidden" name="edit" th:value="${edit}">
                     <input type="hidden"  id="dis" th:value="${disable}">
-                    <input type="hidden" name="deptId" th:value="${dptId}">
                     <table>
                         <tbody>
                             <tr>
@@ -74,9 +73,9 @@
                             <tr>
                                 <td class="right" style="padding-top: 20px;">TEACHER ASSIGNED</td>
                                 <td class="left" style="padding-top: 20px;">
-                                    <select name="tch" id="cls" class="form-select"  required th:field="*{teacher_assigned.teacher_id}">
+                                    <select name="tch" id="tch" class="form-select"  required>
                                         <option th:each="tch : ${teachers}" th:value="${tch.getTeacher_id()}"
-                                        th:text="${tch.getFullName()}"></option>
+                                        th:text="${tch.getStaffFullName()}"></option>
                                     </select>
                                 </td>
                             </tr>

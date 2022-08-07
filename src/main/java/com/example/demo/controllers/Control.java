@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.text.DecimalFormat;
 import java.util.*;
 
 @Controller
@@ -145,7 +146,8 @@ public class Control {
     // throw exception if saving is not successful
     @RequestMapping(value = "/save_academic_setting")
     public String saveAcademicSetting(HttpServletRequest request,
-                                      @ModelAttribute("termInfo") Term_Info info)throws AppExceptions{
+                                      @ModelAttribute("termInfo") Term_Info info)
+            throws AppExceptions{
         Term term = termInterface.findTermById(Long.parseLong(request.getParameter("trm")));
         info.setTerm(term);
         String firstYear = request.getParameter("first_yrs");
@@ -192,6 +194,7 @@ public class Control {
     @RequestMapping(value = "/admin_terminal_report")
     public String adminTerminalReport(HttpServletRequest request, Model model){
         reportList.clear();
+        DecimalFormat df = new DecimalFormat("0.00");
         Classes classes = classesInterface.findClassById(request.getParameter("cls"));
         Term term = termInterface.findTermById(Long.parseLong(request.getParameter("trm")));
         Academic_Year year = academicYearInterface.findAcademicYearByMaxId(Status.CURRENT);
@@ -234,7 +237,7 @@ public class Control {
             for (Report report1 : reportList){
                 if (score.getExams_score_id().getStudent_id().equals(report1.getStudent())){
                     for (SubjectReportSummary summary1 : report1.getSummaryList()){
-                        if(summary1.getSubject_name().equals(score.getExams_score_id().getSubject_id().getSubject_name())){
+                        if(summary1.getSubject_name().equals(score.getExams_score_id().getSubject_id().shotSubjectName())){
                             exa_marks = score.getMarks() * (100 - scale)/100.0;
                             summary1.setExams_score(exa_marks);
                             summary1.setTotal(exa_marks);
@@ -249,7 +252,7 @@ public class Control {
             for (Report report1 : reportList){
                 if(sba.getMarksId().getStudent_id().equals(report1.getStudent())){
                     for (SubjectReportSummary summary1 : report1.getSummaryList()){
-                        if (summary1.getSubject_name().equals(sba.getMarksId().getSubject_id().getSubject_name())){
+                        if (summary1.getSubject_name().equals(sba.getMarksId().getSubject_id().shotSubjectName())){
                             Optional<Double> totals = sba.getMarks().stream().reduce(Double::sum);
                             cls_work = totals.orElse(0.0) * (scale/100.0);
                             summary1.setClass_score(cls_work);
@@ -259,7 +262,7 @@ public class Control {
                             report1.setTotal_score(report1.getTotal_score() + summary1.getTotal());
                         }
                     }
-                    report1.setAverage_score(report1.getAverage_score()/(100.0*subjects.size()));
+                    report1.setAverage_score(Double.parseDouble(df.format(report1.getAverage_score()/report1.getSummaryList().size())));
                     break;
                 }
             }
@@ -302,8 +305,9 @@ public class Control {
 
     @RequestMapping(value = "/save_head_filling_report")
     public String saveHeadFillingReport(@ModelAttribute("reportDetail")Report details,
-                                        @RequestParam("cls")String classId,@RequestParam("trm") Long termId,
-                                        @RequestParam("idx")Integer index,@RequestParam("stuId")String studId){
+                                        @RequestParam("cls")String classId,@RequestParam("trm")
+                                            Long termId, @RequestParam("idx")Integer index,
+                                        @RequestParam("stuId")String studId){
         Classes classes = classesInterface.findClassById(classId);
         Term term = termInterface.findTermById(termId);
         Student student = studentInterface.findStudentById(studId);
@@ -328,7 +332,7 @@ public class Control {
     Long term_id, @RequestParam("index") Integer index,Model model){
         Classes classes = classesInterface.findClassById(class_id);
         Term term = termInterface.findTermById(term_id);
-        Report report = new Report() ;
+        Report report;
         if (index > reportList.size()-1){
             return "redirect:/term_report_form";
         }else {
@@ -339,7 +343,8 @@ public class Control {
     }
 
     @RequestMapping(value = "/search_head_filling_report")
-    public String searchFillingReport(HttpServletRequest servletRequest,Model model) throws AppExceptions{
+    public String searchFillingReport(HttpServletRequest servletRequest,Model model)
+            throws AppExceptions{
         Term term = termInterface.findTermById(Long.parseLong(servletRequest.getParameter("trm")));
         Classes classes = classesInterface.findClassById(servletRequest.getParameter("cls"));
         Student student = studentInterface.findStudentById(servletRequest.getParameter("stuId"));
@@ -367,12 +372,14 @@ public class Control {
     }
 
     @RequestMapping(value = "/head_passed_record")
-    public String passedRecord(@RequestParam("student_id") String student_id, Model model) throws AppExceptions {
+    public String passedRecord(@RequestParam("student_id") String student_id, Model model)
+            throws AppExceptions {
         passReportList.clear();
         detailsList.clear();
+        DecimalFormat df = new DecimalFormat("0.00");
         Student student = studentInterface.findStudentById(student_id);
         List<ExamsScore> scoreFromExams = examsScoreInterface.examsScoreByStudentIdFromExams(student,
-                student.getClasses().getParentClass().getClass_department());;
+                student.getClasses().getParentClass().getClass_department());
         List<ExamsScore> scoreFromRecordTable = examsScoreInterface.examsScoreByStudentIdFromRecordExams(student,
                 student.getClasses().getParentClass().getClass_department());
         List<SBA> sbaListFromRecordTable = sbaInterface.sbaByStudentIdFromRecordSBA(student,
@@ -442,8 +449,8 @@ public class Control {
                     reportDetail = reportDetails;
                 }
             }
-            passReportList.add(new Report(student,student.getStudentFullName(),total,0,(total/size),
-                    reportDetail,"",entry.getValue()));
+            passReportList.add(new Report(student,student.getStudentFullName(),total,0,Double.parseDouble(
+                    df.format((total/size))), reportDetail,"",entry.getValue()));
         }
         Help.aggregateScore(passReportList,subjectInterface);
         setModelForPassRecord(detailsList.get(0),model,passReportList.get(0),sbaConfig,1);
@@ -591,7 +598,7 @@ public class Control {
         List<Long> selectedTeachers = new ArrayList<>();
         for (Teacher teacher : teacherList.getList()){
             teacher.setTeacherClasses(classesInterface.findClassByTeacher(teacher.getTeacher_id()));
-            teacher.setTeacherSubjects(subjectInterface.teacherSubjectName(teacher));
+            teacher.setTeacherSubjects(subjectInterface.teacherSubjectName(teacher.getTeacher_id()));
             teacher.setFullName(teacher.getStaffFullName());
             selectedTeachers.add(0L);
         }
@@ -661,7 +668,7 @@ public class Control {
         TeacherSet teacherList = new TeacherSet(teacherInterface.teacherByDepartment(department,Student_Status.ACTIVE));
         for (Teacher teacher : teacherList.getList()){
             teacher.setTeacherClasses(classesInterface.findClassByTeacher(teacher.getTeacher_id()));
-            teacher.setTeacherSubjects(subjectInterface.teacherSubjectName(teacher));
+            teacher.setTeacherSubjects(subjectInterface.teacherSubjectName(teacher.getTeacher_id()));
             teacher.setFullName(teacher.getStaffFullName());
         }
         model.addAttribute("class",classes);
@@ -714,7 +721,7 @@ public class Control {
     public String viewStaffProfile(@RequestParam("staff") Long teacherId,Model model){
         Teacher teacher = teacherInterface.findTeacherByID(teacherId);
         teacher.setTeacherClasses(classesInterface.findClassByTeacher(teacherId));
-        teacher.setTeacherSubjects(subjectInterface.teacherSubjectName(teacher));
+        teacher.setTeacherSubjects(subjectInterface.teacherSubjectName(teacherId));
         teacher.setFullName(teacher.getStaffFullName());
         List<Classes> classesList = classesInterface.findClassByDepartment(teacher.getDepartment_Id());
         Classes classes = new Classes();
@@ -726,7 +733,6 @@ public class Control {
         }
         model.addAttribute("staff",teacher);
         model.addAttribute("class",classes);
-        Optional<String> photo = Optional.ofNullable(teacher.getPhoto());
         if(teacher.getPhotoImage() != null)
             return "view_staff_profile";
         else
@@ -738,6 +744,12 @@ public class Control {
         Teacher staff = teacherInterface.findTeacherByID(teacherId);
         staff.setStatus(Student_Status.COMPLETED);
         teacherInterface.saveTeacher(staff);
+        List<Subjects> subjectsList = subjectInterface.subjectByDepartment(staff.getDepartment_Id(),
+                Student_Status.ACTIVE);
+        subjectsList.forEach(subjects -> {
+            subjects.getTeacher_assigned().remove(staff);
+            subjectInterface.saveSubject(subjects);
+        });
         List<Classes> classesList = classesInterface.findClassByDepartment(staff.getDepartment_Id());
         classesList.forEach(classes -> {
             if(classes.getClass_teacher_id().equals(staff)){
@@ -753,29 +765,30 @@ public class Control {
     public String addStaff(Model model,@ModelAttribute("staff") Teacher teacher){
         DepartmentHead head =findAdmin();
         List<Department> departmentList =departmentInterface.findDepartmentByHead(head);
+        List<Subjects> subjectsList = subjectInterface.subjectByDepartment(departmentList.get(0),Student_Status.ACTIVE);
         model.addAttribute("dept",departmentList);
         model.addAttribute("staff", Objects.requireNonNullElseGet(teacher, Teacher::new));
         model.addAttribute("male",Gender.MALE);
         model.addAttribute("female",Gender.FEMALE);
+        model.addAttribute("subject",subjectsList);
+        model.addAttribute("class",new ArrayList<>(classesInterface.findClassByDepartment(
+                departmentList.get(0))));
         return "add_teacher";
     }
 
-    @RequestMapping(value = "/save_staff", method = RequestMethod.POST , produces = "application/json")
+    @RequestMapping(value = "/save_staff", method = RequestMethod.POST ,
+            produces = "application/json")
     public String saveStaff(@Valid @ModelAttribute("staff") Teacher teacher, Model model,
                             @RequestParam(value = "img",required = false) MultipartFile file){
-        DepartmentHead head = findAdmin();
         String fileName = "";
+        int edit = 0;
         if (file !=null){
             fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
             teacher.setPhoto(fileName);
         }
-        List<Department> departmentList = departmentInterface.findDepartmentByHead(head);
-        List<Subjects> subjectsList = new ArrayList<>();
-        List<Classes> classesList = classesInterface.listClassByDepartmentHead(head);
-        for (Department department : departmentList) {
-            subjectsList.addAll(subjectInterface.subjectByDepartment(department,Student_Status.ACTIVE));
-        }
-        teacher.setDepartment_Id(departmentInterface.findByDepartmentId(teacher.getDepartment_Id().getDepartmentID()));
+        Department department = departmentInterface.findByDepartmentId(
+                teacher.getDepartment_Id().getDepartmentID());
+        teacher.setDepartment_Id(department);
         teacher.setStatus(Student_Status.ACTIVE);
         List<Roles> rolesList = rolesServiceInterface.rolesList();
         Set<Roles> rolesSet = new HashSet<>() ;
@@ -784,56 +797,91 @@ public class Control {
                 rolesSet.add(roles);
             }
         }
-        teacher.setUsers(Help.user(teacher,rolesSet));
-        int edited = 0;
-        Optional<Long> id = Optional.ofNullable(teacher.getTeacher_id());
-        if (id.isPresent()){
-            teacherInterface.updateTeacher(teacher.getStatus(),teacher.getLast_name(),teacher.getFirst_name(),
-                    teacher.getContact(),teacher.getMiddle_name(),teacher.getDepartment_Id(),teacher.getGender(),
-                    teacher.getPhoto(), teacher.getTeacher_id());
-            edited = 1;
+        Optional<Long> teacherId = Optional.ofNullable(teacher.getTeacher_id());
+        if (teacherId.isPresent()){
+            teacherInterface.updateTeacher(Student_Status.ACTIVE,
+                    teacher.getLast_name(),teacher.getFirst_name(),
+                    teacher.getContact(),teacher.getMiddle_name(),
+                    department,teacher.getGender(),teacher.getPhoto(),
+                    teacher.getTeacher_id());
+            edit = 1;
         }else {
+            teacher.setUsers(Help.user(teacher, rolesSet));
             teacherInterface.saveTeacher(teacher);
-            passwordInterface.savePassword(new PlainPassword(
-                    teacher.getUsers().getPlainPassword(),teacher.getUsers()));
+            passwordInterface.savePassword(new PlainPassword(teacher.getUsers().getPlainPassword(),
+                    teacher.getUsers()));
         }
         if (! fileName.equals("")) {
             String upLoadDirectory = "./pictures/staffs_pics/" + teacher.getTeacher_id();
             Help.saveFile(upLoadDirectory, fileName, file);
         }
-        model.addAttribute("subjects",subjectsList);
-        model.addAttribute("classes",classesList);
+        teacher.setTeacherClasses(new ArrayList<>());
+        teacher.setTeacherSubjects(new ArrayList<>());
         model.addAttribute("staff",teacher);
-        model.addAttribute("edited",edited);
+        model.addAttribute("subjects",new ArrayList<>(
+                subjectInterface.subjectByDepartment(department, Student_Status.ACTIVE)));
+        model.addAttribute("class",new ArrayList<>(
+                classesInterface.findClassByDepartment(department)));
+        model.addAttribute("edit",edit);
         return "class_subjects";
     }
 
-    @RequestMapping(value = "/save_classes_subject")
-    public String saveClassSubject(@ModelAttribute("staff") Teacher teacher,@RequestParam("edited")
-                                   int edited){
-        Teacher teacher1 = teacherInterface.findTeacherByID(teacher.getTeacher_id());
-        if (teacher1.getTeacherClasses() != null){
-            for (String classId : teacher1.getTeacherClasses()) {
-                Classes classes = classesInterface.findClassById(classId);
-                classes.getClass_teachers().add(teacher1);
-                classesInterface.saveClass(classes);
+    @RequestMapping(value = "/save_sub_cls_assign")
+    public String saveSubCls(@ModelAttribute("staff") Teacher teacher,
+                             @RequestParam("edit") int edit) throws AppExceptions{
+        Teacher staff = teacherInterface.findTeacherByID(teacher.getTeacher_id());
+        List<Classes> classesList = classesInterface.findClassByDepartment(staff.getDepartment_Id());
+        classesList.forEach(classes -> {
+            classes.getClass_teachers().remove(staff);
+            classesInterface.saveClass(classes);
+        });
+        List<Subjects> subjectsList = subjectInterface.subjectByDepartment(
+                staff.getDepartment_Id(),Student_Status.ACTIVE);
+        subjectsList.forEach(subjects -> {
+            subjects.getTeacher_assigned().remove(staff);
+            subjectInterface.saveSubject(subjects);
+        });
+        if (teacher.getTeacherClasses() != null) {
+            for (String classesId : teacher.getTeacherClasses()) {
+                Classes classes = classesInterface.findClassById(classesId);
+                Set<Teacher> teacherList = classes.getClass_teachers();
+                if (!teacherList.isEmpty()) {
+                    classes.getClass_teachers().add(staff);
+                    classesInterface.saveClass(classes);
+                } else {
+                    Set<Teacher> set = new HashSet<>();
+                    set.add(staff);
+                    classes.setClass_teachers(set);
+                    classesInterface.saveClass(classes);
+                }
             }
         }
-        if (teacher1.getTeacherSubjects() != null) {
+        if (teacher.getTeacherSubjects() != null) {
             for (String subjectId : teacher.getTeacherSubjects()) {
                 Subjects subjects = subjectInterface.findSubjectById(Long.parseLong(subjectId));
-                subjects.setTeacher_assigned(teacher1);
-                subjectInterface.saveSubject(subjects);
+                if (!subjects.getTeacher_assigned().isEmpty()) {
+                    if (checkForClassesInCommon(subjects, staff)){
+                        throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.CONFLICT,
+                                "TWO TEACHERS WITH SAME CLASSES AND SUBJECT ASSIGNED"));
+                    }
+                    subjects.getTeacher_assigned().add(staff);
+                    subjectInterface.saveSubject(subjects);
+                } else {
+                    Set<Teacher> teacherSet = new HashSet<>();
+                    teacherSet.add(staff);
+                    subjects.setTeacher_assigned(teacherSet);
+                    subjectInterface.saveSubject(subjects);
+                }
             }
         }
-        if (edited > 0){
-            return "redirect:/view_staff_profile?staff=" + teacher.getTeacher_id();
-        }
-        return "redirect:/staffs";
+        if (edit == 1)
+          return "redirect:/staffs";
+        else
+            return  "redirect:/user_detail?staff=" + teacher.getTeacher_id();
     }
-
     @RequestMapping(value = "/edit_staff_profile")
-    public String editStaffProfile(@RequestParam("staff") Long teacherId,RedirectAttributes attributes){
+    public String editStaffProfile(@RequestParam("staff") Long teacherId,
+                                   RedirectAttributes attributes){
         Teacher teacher = teacherInterface.findTeacherByID(teacherId);
         attributes.addFlashAttribute("staff",teacher);
         return "redirect:/add_staff";
@@ -847,8 +895,6 @@ public class Control {
         for (Department department : departmentList){
             subjectsList.addAll(subjectInterface.subjectByDepartment(department,Student_Status.ACTIVE));
         }
-        subjectsList.forEach(subjects -> subjects.getTeacher_assigned().setFullName
-                (subjects.getTeacher_assigned().getStaffFullName()));
         model.addAttribute("subjects",subjectsList);
         return "view_subject";
     }
@@ -860,27 +906,28 @@ public class Control {
     {
         DepartmentHead head = findAdmin();
         List<Department> departmentList = departmentInterface.findDepartmentByHead(head);
-        List<Teacher> teacherList = teacherInterface.teacherByDepartment(departmentList.get(0),Student_Status.ACTIVE);
-        teacherList.forEach(teacher -> teacher.setTeacherSubjects(subjectInterface.teacherSubjectName(teacher)));
-        List<Teacher> possibleSubjectTeachers = new ArrayList<>();
-        for (Teacher teacher : teacherList) {
-            if (teacher.getTeacherSubjects().size() <= 1){
-                teacher.setFullName(teacher.getStaffFullName());
-                possibleSubjectTeachers.add(teacher);
-            }
-        }
+        List<Teacher> teacherList = teacherInterface.teacherByDepartment(
+                departmentList.get(0),Student_Status.ACTIVE);
         if (Objects.nonNull(value)){
             model.addAttribute("disable",value);
-            model.addAttribute("dptId",subjects.getDepartment_subject().getDepartmentID());
             model.addAttribute("edit",1);
+            teacherList = teacherInterface.teacherByDepartment(subjects.getDepartment_subject(),
+                    Student_Status.ACTIVE);
+            teacherList.removeAll(subjects.getTeacher_assigned());
+            teacherList.removeIf(teacher -> checkForClassesInCommon(subjects, teacher));
         } else if (Objects.nonNull(manSub)){
+            model.addAttribute("disable",1);
             model.addAttribute("edit",2);
+            teacherList = teacherInterface.teacherByDepartment(subjects.getDepartment_subject(),
+                    Student_Status.ACTIVE);
+            teacherList.removeAll(subjects.getTeacher_assigned());
+            teacherList.removeIf(teacher -> checkForClassesInCommon(subjects, teacher));
         } else {
             model.addAttribute("edit",0);
         }
         model.addAttribute("sub", Objects.requireNonNullElseGet(subjects, Subjects::new));
         model.addAttribute("dept",departmentList);
-        model.addAttribute("teachers",possibleSubjectTeachers);
+        model.addAttribute("teachers",teacherList);
         model.addAttribute("core", CoreSubject.YES);
         model.addAttribute("notCore",CoreSubject.NOT);
         return "add_subject";
@@ -888,26 +935,56 @@ public class Control {
 
     @RequestMapping(value = "/save_subject")
     public String saveSubject(@ModelAttribute("sub") Subjects subjects,
-                              @RequestParam("edit") String edit,HttpServletRequest request){
+                              @RequestParam("tch")Long tchId, @RequestParam("edit") String edit)
+            throws AppExceptions{
+        Teacher teacher = teacherInterface.findTeacherByID(tchId);
         if (Objects.equals(edit, "1")){
-            subjects.setOptions(subjects.getOptions());
-            subjects.setDepartment_subject(departmentInterface.findByDepartmentId(
-                    Long.parseLong(request.getParameter("deptId"))));
+            subjects.setSubject_name(subjects.getSubject_name());
+            Subjects temp = subjectInterface.findSubjectById(subjects.getSubject_id());
+            if (checkForClassesInCommon(subjects, teacher)){
+                throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.CONFLICT,
+                        "TWO TEACHERS WITH SAME CLASSES AND SUBJECT ASSIGNED"));
+            }
+            temp.getTeacher_assigned().add(teacher);
+            temp.setSubject_name(subjects.getSubject_name());
+            subjectInterface.saveSubject(temp);
         } else if (Objects.equals(edit,"2")) {
-            subjects.setOptions(subjects.getOptions());
-            subjects.setDepartment_subject(departmentInterface.findByDepartmentId(
-                    subjects.getDepartment_subject().getDepartmentID()));
+            subjects.setSubject_name(subjects.getSubject_name());
+            Subjects temp = subjectInterface.findSubjectById(subjects.getSubject_id());
+            if (checkForClassesInCommon(subjects, teacher)){
+                throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.CONFLICT,
+                        "TWO TEACHERS WITH SAME CLASSES AND SUBJECT ASSIGNED"));
+            }
+            temp.getTeacher_assigned().add(teacher);
+            temp.setSubject_name(subjects.getSubject_name());
+            subjectInterface.saveSubject(temp);
         } else {
             subjects.setDepartment_subject(departmentInterface.findByDepartmentId(
                     subjects.getDepartment_subject().getDepartmentID()));
+            Set<Teacher> teacherSet = new HashSet<>();
+            subjects.setOptions(SubjectOptions.MANDATORY);
+            subjects.setSubject_Status(Student_Status.ACTIVE);
+            teacherSet.add(teacher);
+            subjects.setTeacher_assigned(teacherSet);
+            subjectInterface.saveSubject(subjects);
         }
-        subjects.setOptions(SubjectOptions.MANDATORY);
-        subjects.setSubject_Status(Student_Status.ACTIVE);
-        subjects.setTeacher_assigned(teacherInterface.findTeacherByID(subjects.getTeacher_assigned().getTeacher_id()));
-        subjectInterface.saveSubject(subjects);
         return "redirect:/subject";
     }
-
+    private boolean checkForClassesInCommon(Subjects subjects, Teacher teacher){
+        boolean found = false;
+        List<Classes> classesList = classesInterface.teacherClasses(teacher.getTeacher_id());
+      outer:  for (Teacher teacher1 : subjects.getTeacher_assigned()){
+            for (Classes classes : classesInterface.teacherClasses(teacher1.getTeacher_id())){
+                for (Classes classes1 : classesList){
+                    if (classes.equals(classes1)) {
+                        found = true;
+                        break outer;
+                    }
+                }
+            }
+        }
+        return found;
+    }
     @RequestMapping(value = "/add_opt_subject")
     public String addOptionalSubject(Model model){
         DepartmentHead head = findAdmin();
@@ -938,14 +1015,22 @@ public class Control {
 
     @RequestMapping(value = "/save_opt_sub_subject")
     public String saveOptSubSubject(@ModelAttribute("subList") SubjectSet set,
-                                   @RequestParam("optName")String name,@RequestParam("dptId") Long id){
+                                   @RequestParam("optName")String name,
+                                    @RequestParam("dptId") Long id){
         Department department = departmentInterface.findByDepartmentId(id);
         OptionalSubject subject = new OptionalSubject();
         for (Subjects subjects : set.getSubSubjectList()){
             subjects.setDepartment_subject(department);
             subjects.setOptions(SubjectOptions.OPTIONAL);
-            subjects.setTeacher_assigned(teacherInterface.findTeacherByID(
-                    subjects.getTeacher_assigned().getTeacher_id()));
+            if (!subjects.getTeacher_assigned().isEmpty()){
+                subjects.getTeacher_assigned().add(teacherInterface.findTeacherByID(
+                        subjects.getTeacher_assigned().iterator().next().getTeacher_id()));
+            }else {
+                Set<Teacher> teacherSet = new HashSet<>();
+                teacherSet.add(teacherInterface.findTeacherByID(
+                        subjects.getTeacher_assigned().iterator().next().getTeacher_id()));
+                subjects.setTeacher_assigned(teacherSet);
+            }
             subjects.setSubject_Status(Student_Status.ACTIVE);
         }
         subject.setDepartment_subject(department);
@@ -956,7 +1041,8 @@ public class Control {
     }
 
     @RequestMapping(value = "/edit_subject")
-    public String editSubject(@RequestParam("sub") Long subjectId,RedirectAttributes attributes){
+    public String editSubject(@RequestParam("sub") Long subjectId,
+                              RedirectAttributes attributes){
         Subjects subjects = subjectInterface.findSubjectById(subjectId);
         if(subjects.getOptions().equals(SubjectOptions.OPTIONAL)) {
             attributes.addFlashAttribute("sub", subjects);
@@ -1006,17 +1092,25 @@ public class Control {
 
     @RequestMapping(value = "/opt_sub_students")
     public String optSubjectStudents(@RequestParam("cls") String classId,Model model,
-                                     @RequestParam("sub") String subjectId) throws AppExceptions{
+                                     @RequestParam("sub") String subjectId)
+            throws AppExceptions{
         Classes classes = classesInterface.findClassById(classId);
         OptionalSubject subject = optionalSubjectInterface.findOptSubjectById(Long.parseLong(subjectId)) ;
         if (!classes.getParentClass().getClass_department().equals(subject.getDepartment_subject()))
             throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.BAD_REQUEST,"SELECTED CLASS DOES NOT OFFER SELECTED SUBJECT"));
         List<Student> studentList = studentInterface.studentsByClass(Student_Status.ACTIVE,classes);
         List<OptionalSubjectStudents> optSubStuList = new ArrayList<>();
-        for (Student student : studentList){
-            student.setFullName(student.getStudentFullName());
-            optSubStuList.add(new OptionalSubjectStudents(student));
-        }
+        first: for (Student student : studentList){
+                OptionalSubjectStudents students = new OptionalSubjectStudents(student,0L);
+                for (Subjects subjects : subject.getSubjectsSet()){
+                        if (subjects.getStudentSet().contains(student)){
+                        students.setOptSubjectId(subjects.getSubject_id());
+                        optSubStuList.add(students);
+                        continue first;
+                    }
+                }
+                optSubStuList.add(students);
+            }
 
         model.addAttribute("optSubStudent",new OptionalSubjectStudentSet(optSubStuList));
         model.addAttribute("optSubject",subject.getSubjectsSet());
@@ -1026,21 +1120,24 @@ public class Control {
     @RequestMapping(value = "/save_opt_stu_subject")
     public String saveOptSubjectStudent(@ModelAttribute("optSubStudent") OptionalSubjectStudentSet
                                                     studentSet){
-        List<Student> studentList = new ArrayList<>();
         Map<Subjects, List<Student>> map = new HashMap<>();
         for (OptionalSubjectStudents students : studentSet.getSubjectStudents()){
             Subjects subjects = subjectInterface.findSubjectById(students.getOptSubjectId());
             Student student = studentInterface.findStudentById(students.getStudent().getStudent_id());
-            if (map.containsKey(subjects)) {
-                studentList = map.get(subjects);
+            if (!map.containsKey(subjects)){
+                List<Student> studentList = new ArrayList<>();
+                studentList.add(student);
+                map.put(subjects,studentList);
+            }else {
+                List<Student> list = map.get(subjects);
+                list.add(student);
+                map.put(subjects,list);
             }
-            studentList.add(student);
-            map.put(subjects,studentList);
-            studentList = new ArrayList<>();
         }
         for (Map.Entry<Subjects,List<Student>> entry : map.entrySet()){
-            entry.getKey().setStudentSet(new HashSet<>(entry.getValue()));
-            subjectInterface.saveSubject(entry.getKey());
+            Subjects subjects = subjectInterface.findSubjectById(entry.getKey().getSubject_id());
+            subjects.getStudentSet().addAll(entry.getValue());
+            subjectInterface.saveSubject(subjects);
         }
         return "redirect:/subject";
     }
@@ -1065,9 +1162,11 @@ public class Control {
     }
 
     // student primary key or student id;
-    @RequestMapping(value = "/guardian_form",method = RequestMethod.POST , produces = "application/json")
+    @RequestMapping(value = "/guardian_form",method = RequestMethod.POST ,
+            produces = "application/json")
     public String guardianForm(@ModelAttribute("student") Student student,Model model,
-                               @RequestParam(value = "img",required = false) MultipartFile file){
+                               @RequestParam(value = "img",required = false)
+                               MultipartFile file){
         String fileName = "";
         if (file != null) {
             fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
@@ -1088,9 +1187,11 @@ public class Control {
         return "add_student_guardian";
     }
 
-    @RequestMapping(value = "/edit_guardian_form",method = RequestMethod.POST , produces = "application/json")
+    @RequestMapping(value = "/edit_guardian_form",method = RequestMethod.POST ,
+            produces = "application/json")
     public String editedGuardianForm(@ModelAttribute("student") Student student,Model model,
-                                     @RequestParam(value = "stuImg",required = false) MultipartFile file){
+                                     @RequestParam(value = "stuImg",required = false)
+                                     MultipartFile file){
         String fileName = "";
         if (file != null) {
             fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
@@ -1138,9 +1239,11 @@ public class Control {
     }
 
     @RequestMapping(value = "/sba_config_next")
-    public String sbaConfigNext(@ModelAttribute("config") SBAConfig config,Model model) throws AppExceptions{
+    public String sbaConfigNext(@ModelAttribute("config") SBAConfig config,Model model)
+            throws AppExceptions{
         config.setStatus(Status.CURRENT);
-        Department department = departmentInterface.findByDepartmentId(config.getDepartment().getDepartmentID());
+        Department department = departmentInterface.findByDepartmentId(
+                config.getDepartment().getDepartmentID());
         config.setDepartment(department);
         Academic_Year year = academicYearInterface.findAcademicYearByMaxId(Status.CURRENT);
         if (year == null){
@@ -1178,7 +1281,8 @@ public class Control {
         List<SBAConfig> configs = sbaConfigInterface.findAllConfig();
         for (SBAConfig sbaConfig : configs) {
             List<SBA> sbaList = sbaInterface.findAllByConfig(sbaConfig);
-            sbaConfig.setEditable(sbaConfig.getStatus().equals(Status.CURRENT) && sbaList.isEmpty());
+            sbaConfig.setEditable(sbaConfig.getStatus().equals(Status.CURRENT) &&
+                    sbaList.isEmpty());
         }
         model.addAttribute("config", configs);
         return "view_sba_config";
@@ -1213,7 +1317,8 @@ public class Control {
         return "batch_student_form";
     }
 
-    @RequestMapping(value = "/save_batch_students",method = RequestMethod.POST , produces = "application/json")
+    @RequestMapping(value = "/save_batch_students",method = RequestMethod.POST ,
+            produces = "application/json")
     public String saveBatchStudent(@ModelAttribute("file")MultipartFile file, Model model,
                                    @RequestParam("clsId")String classId) throws AppExceptions {
 
@@ -1226,7 +1331,8 @@ public class Control {
     }
     @RequestMapping(value = "/promotion")
     public String promotion(@RequestParam("criteria") String criteria, Model model,
-                            HttpServletRequest request,RedirectAttributes attributes) throws AppExceptions{
+                            HttpServletRequest request,RedirectAttributes attributes)
+            throws AppExceptions{
         DepartmentHead head = findAdmin();
         List<Classes> classWithNoEntry = new ArrayList<>();
         List<Classes> classWithUncompletedData = new ArrayList<>();
@@ -1235,7 +1341,7 @@ public class Control {
         List<Subjects> subjectsList;
         List<ExamsScore> examsScoreList;
         int subjectNumber = 0, totalKey = 0;
-        final List<OptionalSubject> list = new ArrayList<>(); ;
+        final List<OptionalSubject> list = new ArrayList<>();
         Term term = termInterface.findTermById(3L);
         final Map<Subjects,Integer > optSubject = new HashMap<>();
         for (Department department : departmentList) {
@@ -1300,8 +1406,9 @@ public class Control {
     }
 
     @RequestMapping(value = "/head_next_pass_report")
-    public String next_pass_report(@RequestParam("index") Integer index,Model model) throws AppExceptions{
-        Report report = new Report();
+    public String next_pass_report(@RequestParam("index") Integer index,Model model)
+            throws AppExceptions{
+        Report report;
         if (index > passReportList.size()-1){
             String message = "END OF STUDENT RECORD";
             throw new NoPassRecordFoundException(new ErrorMessage(HttpStatus.OK,message));
@@ -1525,8 +1632,8 @@ public class Control {
             if (subId.isPresent() && subId.get() > 0){
                 Subjects subject = subjectInterface.findSubjectById(subjects.getSubject_id());
                 subject.setSubject_name(subjects.getSubject_name());
-                subject.setTeacher_assigned(teacherInterface.findTeacherByID(
-                        subjects.getTeacher_assigned().getTeacher_id()));
+                subject.getTeacher_assigned().add(teacherInterface.findTeacherByID(
+                        subjects.getTeacher_assigned().iterator().next().getTeacher_id()));
                 subject.setSubject_Status(Student_Status.ACTIVE);
                 subject.setDepartment_subject(optionalSubject.getDepartment_subject());
                 subject.setOptions(SubjectOptions.OPTIONAL);
@@ -1536,8 +1643,8 @@ public class Control {
                 subjects.setSubject_Status(Student_Status.ACTIVE);
                 subjects.setDepartment_subject(optionalSubject.getDepartment_subject());
                 subjects.setOptions(SubjectOptions.OPTIONAL);
-                subjects.setTeacher_assigned(teacherInterface.findTeacherByID(
-                        subjects.getTeacher_assigned().getTeacher_id()));
+                subjects.getTeacher_assigned().add(teacherInterface.findTeacherByID(
+                        subjects.getTeacher_assigned().iterator().next().getTeacher_id()));
                 subjectsSet.add(subjects);
             }
         });
@@ -1654,6 +1761,15 @@ public class Control {
         model.addAttribute("series",seriesList);
         model.addAttribute("subject",subjectName);
         return "headSummaryReport";
+    }
+
+    @RequestMapping(value = "/user_detail")
+    public String loginDetails(@RequestParam("staff")Long teachId,Model model){
+        Teacher teacher = teacherInterface.findTeacherByID(teachId);
+        PlainPassword plainPassword = passwordInterface.findPassword(teacher.getUsers());
+        model.addAttribute("teacher",teacher);
+        model.addAttribute("user",plainPassword);
+        return "login_details";
     }
 
 }

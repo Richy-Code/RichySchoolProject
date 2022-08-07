@@ -72,7 +72,7 @@
                                 </tr>
                                 <tr>
                                     <td class="left">ATTENDANCE :</td>
-                                    <td class="right1"><input type="number" id="attended" min="0"
+                                    <td class="right1"><input type="number" id="attended" min="0" required
                                                  name="attend" th:value="${report.getReportDetails().getAttendance()}"> OUT
                                         <th:block th:object="${commonDetails}">
                                             <input type="number" id="total"  name="tol" min="0"  required th:field="*{total_attendance}">
@@ -207,7 +207,7 @@
                     </div>
                 </div>
                 <div style="display: flex; justify-content: center; margin-top: 10px; margin-bottom: 10px;" id="btn">
-                    <div style="padding-right: 200px;"><button class="btn btn-primary" type="submit" id="save">SAVE</button></div>
+                    <div><button class="btn btn-primary" type="submit" id="save">SAVE</button></div>
                 </div>
             </form>
         </div>

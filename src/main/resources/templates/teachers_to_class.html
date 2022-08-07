@@ -20,7 +20,7 @@
         <div>
             <h1 class="lab" th:text="'ASSIGN TEACHERS TO '+${className}"></h1>
         </div>
-        <div style="align-self: center; margin-top: 10px">
+        <div style="align-self: center; margin-top: 10px" id="section-two">
             <form action="/save_class" th:object="${class}">
                 <input type="hidden" th:value="${class.getParentClass().getParentClassId()}" th:field="*{parentClass.parentClassId}">
                 <input type="hidden" th:value="${class.getClass_teacher_id().getTeacher_id()}" th:field="*{class_teacher_id.teacher_id}">

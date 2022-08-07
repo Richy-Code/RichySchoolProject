@@ -29,7 +29,7 @@
                             <tr>
                                 <td class="right">SUBJECT NAME</td>
                                 <td class="left">
-                                    <input type="text" class="form-control" required autocapitalize="characters"
+                                    <input type="text" class="form-control" required style="text-transform: uppercase"
                                            th:field="*{subSubjectList[__${item.index}__].subject_name}">
                                 </td>
                             </tr>
@@ -37,7 +37,7 @@
                                 <td class="right">TEACHER ASSIGNED</td>
                                 <td class="left">
                                     <select  th:id="'tch'+${item.index}" required class="form-select"
-                                            th:field="*{subSubjectList[__${item.index}__].teacher_assigned.teacher_id}">
+                                            th:field="*{subSubjectList[__${item.index}__].teacher_assigned}">
                                         <option th:each="tchs : ${tch}" th:value="${tchs.getTeacher_id()}"
                                          th:text="${tchs.getFullName()}"></option>
                                     </select>
@@ -51,5 +51,14 @@
         </div>
     </div>
     <script th:src="@{bootstrap_js.js}"></script>
+    <script>
+        document.querySelector("input").addEventListener("input", function(event) {
+            const input = event.target;
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            input.value = input.value.toLocaleUpperCase();
+            input.setSelectionRange(start, end);
+        })
+    </script>
 </body>
 </html>

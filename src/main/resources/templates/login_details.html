@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{exams_home_page.css}">
+    <link rel="stylesheet" th:href="@{bootstrap_css.css}">
+    <title>LOGIN DETAILS</title>
+</head>
+<body>
+<div id="main-content">
+    <div id="nav-bar">
+        <ul id="nav-link">
+            <li><h3 style="color: white;">LOGIN DETAILS</h3></li>
+            <li><a th:href="@{/admin}">HOME</a></li>
+            <li><a th:href="@{/logout}">LOGOUT</a></li>
+        </ul>
+    </div>
+    <div id="section-two">
+        <div style="text-align: center; width: auto;">
+            <h4 style="font-weight: bold;" th:text="'LOGIN DETAILS'"></h4>
+            <h4 style="font-weight: bold;" th:text="${teacher.getStaffFullName()}"></h4>
+            <table>
+                <tbody style="font-weight: bold; font-size: 1em">
+                <tr>
+                    <td class="right" style="padding-top: 20px;">USER NAME</td>
+                    <td class="left" style="padding-top: 20px;" th:text="${user.getUsers().getUser_name()}"></td>
+                </tr>
+                <tr>
+                    <td class="right" style="padding-top: 20px;">PASSWORD</td>
+                    <td class="left" style="padding-top: 20px;" th:text="${user.getPassword()}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="text-align: center; margin-top: 20px">
+            <a th:href="@{/staffs}" class="btn bg-primary">staff</a>
+        </div>
+    </div>
+</div>
+<script th:src="@{bootstrap_js.js}"></script>
+</body>
+</html>

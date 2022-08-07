@@ -46,7 +46,8 @@
                         </tr>
                         <tr>
                             <td class="left">ACADEMIC YEAR :</td>
-                            <td class="right" th:text="${report.getReportDetails().getAcademic_year()}"></td>
+                            <td class="right" th:text="${report.getReportDetails().getAcademic_year().getFirst_year()
+                            +'/'+report.getReportDetails().getAcademic_year().getLast_year()}"></td>
                         </tr>
                         <tr>
                             <td class="left">POSITION :</td>

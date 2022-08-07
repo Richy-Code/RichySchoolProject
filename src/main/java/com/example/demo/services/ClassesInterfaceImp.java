@@ -66,4 +66,9 @@ public class ClassesInterfaceImp implements ClassesInterface {
         classesRepository.updateSubClassName(name,classId);
     }
 
+    @Override
+    public List<Classes> teacherClasses(Long teacherId) {
+        return classesRepository.findTeacherClasses(teacherId);
+    }
+
 }

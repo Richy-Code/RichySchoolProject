@@ -16,7 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 public class Subjects {
-    public Subjects(String subject_name, Department department_subject,Teacher teacher_assigned,
+    public Subjects(String subject_name, Department department_subject,Set<Teacher> teacher_assigned,
                     SubjectOptions subjectOptions,Student_Status subject_Status,CoreSubject coreSubject) {
         this.subject_name = subject_name;
         this.department_subject = department_subject;
@@ -61,18 +61,14 @@ public class Subjects {
     )
     private Department department_subject;
 
-    @ManyToOne(
+    @OneToMany(
             fetch = FetchType.LAZY,
             cascade = {
                     CascadeType.MERGE,
                     CascadeType.REFRESH
             }
     )
-    @JoinColumn(
-            name = "teacher_assigned",
-            referencedColumnName = "teacher_id"
-    )
-    private Teacher teacher_assigned;
+    private Set<Teacher> teacher_assigned;
 
     @ManyToMany(
             fetch = FetchType.LAZY,

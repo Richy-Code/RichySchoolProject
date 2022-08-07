@@ -24,6 +24,10 @@
                     <input type="hidden" th:value="${subjects.get(0).getSubject_id()}" name="sub">
                     <table>
                         <tbody>
+                        <tr>
+                            <td class="right">SUBJECT</td>
+                            <td class="left"><input class="form-control" type="text" readonly th:value="${subjects.get(0).getSubject_name()}"></td>
+                        </tr>
                             <tr>
                                 <td class="right">CLASS</td>
                                 <td class="left">

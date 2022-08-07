@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class SubjectInterfaceImp implements SubjectInterface {
@@ -43,8 +44,8 @@ public class SubjectInterfaceImp implements SubjectInterface {
     }
 
     @Override
-    public List<Subjects> findSubjectByTeacher(Teacher teacher) {
-        return subjectRepository.teacherSubjects(teacher);
+    public List<Subjects> findSubjectByTeacher(Long teacherId) {
+        return subjectRepository.teacherSubjects(teacherId);
     }
 
 
@@ -54,13 +55,18 @@ public class SubjectInterfaceImp implements SubjectInterface {
     }
 
     @Override
-    public List<String> teacherSubjectName(Teacher teacher) {
-        return subjectRepository.teacherSubjectName(teacher);
+    public List<String> teacherSubjectName(Long teacherId) {
+        return subjectRepository.teacherSubjectName(teacherId);
     }
 
     @Override
     public List<Subjects> subjectByOptionAndDepartment(SubjectOptions options, Department department,
                                                        Student_Status status) {
         return subjectRepository.findByOptions(options,department,status);
+    }
+
+    @Override
+    public void updateSubject(Set<Teacher> set, String subjectName, Long subjectId) {
+       subjectRepository.updateSubject(set,subjectName,subjectId);
     }
 }

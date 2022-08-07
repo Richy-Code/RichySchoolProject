@@ -39,7 +39,7 @@
                 <tr>
                     <th>SUBJECT NAME</th>
                     <th>DEPARTMENT</th> 
-                    <th>TEACHER ASSIGNED</th>
+                    <th>VIEW</th>
                     <th>EDIT</th>
                     <th>DELETE</th>
                 </tr>
@@ -48,7 +48,7 @@
                 <tr th:each="sub : ${subjects}">
                     <td th:text="${sub.getSubject_name()}"></td>
                     <td th:text="${sub.getDepartment_subject().getDepartment_name()}"></td>
-                    <td th:text="${sub.getTeacher_assigned().getFullName()}"></td>
+                    <td><a th:href="@{/view_subject(sub=${sub.getSubject_id()})}" class="btn btn-primary">View</a></td>
                     <td><a th:href="@{/edit_subject(sub=${sub.getSubject_id()})}" class="btn btn-success">Edit</a></td>
                     <td><a th:href="@{/delete_subject_verify(sub=${sub.getSubject_id()})}" class="btn btn-danger">Delete</a></td>
                 </tr>

@@ -24,6 +24,16 @@
         <table>
           <tbody>
           <tr>
+            <td class="right" style="padding-top: 20px;">SUBJECT</td>
+            <td class="left" style="padding-top: 20px;">
+              <select name="sub" id="sub" class="form-select" required>
+                <option th:each="sub : ${subjects}" th:value="${sub.getSubject_id()}"
+                        th:text="${sub.getSubject_name()}"
+                ></option>
+              </select>
+            </td>
+          </tr>
+          <tr>
             <td class="right">CLASS</td>
             <td class="left">
               <select name="cls" id="cls" class="form-select" required>
@@ -40,16 +50,6 @@
                 <option value = 1>TERM ONE</option>
                 <option value = 2>TERM TWO</option>
                 <option value = 3>TERM THREE</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td class="right" style="padding-top: 20px;">SUBJECT</td>
-            <td class="left" style="padding-top: 20px;">
-              <select name="sub" id="sub" class="form-select" required>
-                <option th:each="sub : ${subjects}" th:value="${sub.getSubject_id()}"
-                        th:text="${sub.getSubject_name()}"
-                ></option>
               </select>
             </td>
           </tr>

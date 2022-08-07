@@ -38,7 +38,7 @@
                         <td class="right">TEACHER ASSIGNED</td>
                         <td class="left">
                             <select  th:id="'tch'+${item.index}" required class="form-select"
-                                     th:field="*{subSubjectList[__${item.index}__].teacher_assigned.teacher_id}">
+                                     th:field="*{subSubjectList[__${item.index}__].teacher_assigned}">
                                 <option th:each="tchs : ${tch}" th:value="${tchs.getTeacher_id()}"
                                         th:text="${tchs.getFullName()}"></option>
                             </select>

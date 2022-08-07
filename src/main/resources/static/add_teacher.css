@@ -44,7 +44,6 @@
 #section-two{
     margin-top: 30px;
     padding: 20px;
-    width: 100%;
     width: fit-content;
     border: solid 1px rgb(177,177,177);
     border-radius: 5px;
@@ -67,6 +66,10 @@
 }
 
 #sel .form-check-input, #sel .form-check{
-    margin-left: 0px;
+    margin-left: 0;
     float: none;
+}
+
+input[type = "text"]{
+    text-transform: uppercase;
 }

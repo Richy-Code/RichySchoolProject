@@ -23,6 +23,16 @@
                 <form action="/exams_page">
                     <table>
                         <tbody>
+                        <tr>
+                            <td class="right" style="padding-top: 20px;">SUBJECT</td>
+                            <td class="left" style="padding-top: 20px;">
+                                <select name="sub" id="sub" class="form-select" required>
+                                    <option th:each="sub : ${subjects}" th:value="${sub.getSubject_id()}"
+                                            th:text="${sub.getSubject_name()}"
+                                    ></option>
+                                </select>
+                            </td>
+                        </tr>
                             <tr>
                                 <td class="right">CLASS</td>
                                 <td class="left">
@@ -42,16 +52,6 @@
                                         <option value = 3>TERM THREE</option>
                                     </select>
                                 </td>
-                            </tr>
-                            <tr>
-                                <td class="right" style="padding-top: 20px;">SUBJECT</td>
-                                <td class="left" style="padding-top: 20px;">
-                                    <select name="sub" id="sub" class="form-select" required>
-                                        <option th:each="sub : ${subjects}" th:value="${sub.getSubject_id()}"
-                                                th:text="${sub.getSubject_name()}"
-                                        ></option>
-                                    </select>
-                                </td> 
                             </tr>
                         </tbody>
                     </table>

@@ -7,6 +7,7 @@ import com.example.demo.enum_entities.Student_Status;
 import com.example.demo.enum_entities.SubjectOptions;
 
 import java.util.List;
+import java.util.Set;
 
 public interface SubjectInterface {
     void saveSubject(Subjects subjects);
@@ -15,11 +16,12 @@ public interface SubjectInterface {
 
     List<Subjects> subjectsList();
 
-    List<Subjects> findSubjectByTeacher(Teacher teacher);
+    List<Subjects> findSubjectByTeacher(Long teacherId);
     List<Subjects> subjectByDepartment(Department department, Student_Status status);
 
-    List<String> teacherSubjectName(Teacher teacher);
+    List<String> teacherSubjectName(Long teacherId);
 
     List<Subjects> subjectByOptionAndDepartment(SubjectOptions options, Department department,
                                                 Student_Status status);
+    void updateSubject(Set<Teacher> set,String subjectName, Long subjectId);
 }

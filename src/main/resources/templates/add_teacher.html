@@ -51,15 +51,6 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="right" style="padding-top: 10px;">DEPARTMENT</td>
-                                        <td class="left" style="padding-top: 10px;">
-                                            <select name="dpt" id="cls" class="form-select" required th:field="*{department_Id.departmentID}">
-                                                <option th:each="dep : ${dept}" th:text="${dep.getDepartment_name()}"
-                                                        th:value="${dep.getDepartmentID()}"></option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    <tr>
                                         <td class="right" style="padding-top: 10px;">GENDER</td>
                                         <td style="display: flex; padding-top: 10px; padding-left: 20px;">
                                             <input type="radio" th:field="*{gender}" th:value="${male}" class="form-check" required><span style="margin-left: 10px;">MALE</span>
@@ -67,6 +58,14 @@
                                         </td>
                                     </tr>
                                     <tr>
+                                        <td class="right" style="padding-top: 10px;">DEPARTMENT</td>
+                                        <td class="left" style="padding-top: 10px;">
+                                            <select name="dpt" id="dpt" class="form-select" required th:field="*{department_Id.departmentID}">
+                                                <option th:each="dep : ${dept}" th:text="${dep.getDepartment_name()}"
+                                                        th:value="${dep.getDepartmentID()}"></option>
+                                            </select>
+                                        </td>
+                                    </tr>
                                         <td class="right">PICTURE</td>
                                         <td class="left">
                                             <input type="file" class="form-control" accept="images/*" name="img" id="img">
@@ -82,5 +81,14 @@
         </div>
     </div>
     <script th:src="@{bootstrap_js.js}"></script>
+    <script>
+        document.querySelector("input").addEventListener("input", function(event) {
+            const input = event.target;
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            input.value = input.value.toLocaleUpperCase();
+            input.setSelectionRange(start, end);
+        })
+    </script>
 </body>
 </html>

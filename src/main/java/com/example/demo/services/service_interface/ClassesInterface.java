@@ -16,4 +16,6 @@ public interface ClassesInterface {
    void  deleteClass(Classes classes);
 
    void updateSubClassName(String name, String classId);
+
+   List<Classes> teacherClasses(Long teacherId);
 }

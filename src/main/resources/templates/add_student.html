@@ -76,5 +76,14 @@
         </div>
     </div>
     <script th:src="@{bootstrap_js.js}"></script>
+    <script>
+        document.querySelector("input").addEventListener("input", function(event) {
+            const input = event.target;
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            input.value = input.value.toLocaleUpperCase();
+            input.setSelectionRange(start, end);
+        })
+    </script>
 </body>
 </html>

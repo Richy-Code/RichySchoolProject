@@ -1,6 +1,5 @@
 package com.example.demo.methods;
 
-import com.example.demo.binding_entities.AjaxTeacher;
 import com.example.demo.binding_entities.ErrorMessage;
 import com.example.demo.binding_entities.ExamsEntry;
 import com.example.demo.binding_entities.PromotionResults;
@@ -27,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class Help {
     public static String grade(double mark){
@@ -611,15 +611,15 @@ public class Help {
                 new RelationType("GUARDIAN"));
     }
 
-    public static List<Teacher> filterTeachers(List<Teacher> teachers, Department department,
-                                               SubjectInterface subjectInterface){
+    public static void filterTeachers(List<Teacher> teachers, Department department,
+                                      SubjectInterface subjectInterface){
         List<Subjects> subjectsList = subjectInterface.subjectByDepartment(department,Student_Status.ACTIVE);
         Map<Teacher,Integer> map = new HashMap<>();
         for (Subjects subjects : subjectsList){
             if (! map.containsKey(subjects.getTeacher_assigned())){
-                map.put(subjects.getTeacher_assigned(),1);
+                //map.put(subjects.getTeacher_assigned(),1);
             }else {
-                map.put(subjects.getTeacher_assigned(),map.get(subjects.getTeacher_assigned())+1);
+                //map.put(subjects.getTeacher_assigned(),map.get(subjects.getTeacher_assigned())+1);
             }
         }
         for (Map.Entry<Teacher, Integer> entries : map.entrySet()){
@@ -627,6 +627,10 @@ public class Help {
                 teachers.remove(entries.getKey());
             }
         }
-        return teachers;
+    }
+
+    public static Long numberOfStudents(Stream<Student> studentStream){
+        return studentStream.filter(student -> student.getStudent_status().equals(
+                Student_Status.ACTIVE)).count();
     }
 }

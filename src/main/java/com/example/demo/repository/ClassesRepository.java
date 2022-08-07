@@ -14,10 +14,13 @@ public interface ClassesRepository extends CrudRepository<Classes, String> {
             "cls.class_teacher_id IS NOT NULL")
     List<Classes> findClassByDepartment(@Param("department")Department department);
 
-    @Query(value = "SELECT class_name FROM classes, classes_teacher WHERE classes.class_id= classes_teacher.class_id\n" +
-            "AND classes_teacher.teacher_id = ?1",nativeQuery = true)
-    List<String>findClassesByTeacher(Long teacherId);
+    @Query("SELECT C.class_name FROM Classes C INNER JOIN C.class_teachers T WHERE " +
+            "T.teacher_id = :teacher")
+    List<String>findClassesByTeacher(@Param("teacher")Long teacherId);
 
+    @Query("SELECT C FROM Classes C INNER JOIN C.class_teachers T WHERE " +
+            "T.teacher_id = :teacher")
+    List<Classes> findTeacherClasses(@Param("teacher") Long teacherId);
     @Query("SELECT cls FROM Classes cls WHERE cls.parentClass.class_department.head = :head AND " +
             "cls.class_teacher_id IS NOT NULL")
     List<Classes> listClassesByDepartmentHead(@Param("head")DepartmentHead head);

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.DecimalFormat;
 import java.util.*;
 
 @Controller
@@ -100,9 +101,10 @@ public class Teacher_Controller {
         String user_name = authentication.getName();
         Users users = userServiceInterface.getUser(user_name);
         Teacher teacher = teacherInterface.findTeacherByUsers(users);
-        List<Subjects> teacherSubjects = subjectInterface.findSubjectByTeacher(teacher);
-        List<Classes> classes = classesInterface.classList();
-        List<Classes> teacherClasses = new ArrayList<>();
+        List<Subjects> teacherSubjects = subjectInterface.findSubjectByTeacher(
+                teacher.getTeacher_id());
+        List<Classes> classes = classesInterface.findClassByDepartment(teacher.getDepartment_Id());
+        List<Classes> teacherClasses = classesInterface.teacherClasses(teacher.getTeacher_id());
         String class_teacher_id = "";
         for (Classes classes1 : classes){
             Optional<Teacher> optional = Optional.ofNullable(classes1.getClass_teacher_id());
@@ -111,13 +113,6 @@ public class Teacher_Controller {
             else{
                 if (classes1.getClass_teacher_id().equals(teacher)) {
                     class_teacher_id = classes1.getClass_id();
-                }
-            }
-        }
-        for (Classes classes1 : classes){
-            for (Teacher teacher1 : classes1.getClass_teachers()){
-                if (teacher1.equals(teacher)){
-                    teacherClasses.add(classes1);
                 }
             }
         }
@@ -136,7 +131,6 @@ public class Teacher_Controller {
 
     @RequestMapping(value = "/exams_page")
     public String examsEntry(HttpServletRequest servletRequest,Model model){
-        ExamsEntry examsEntry;
         Exams_EntrySet exams_entrySet = new Exams_EntrySet();
         List<ExamsEntry> examsEntryList = new ArrayList<>();
         Long term_id = Long.parseLong(servletRequest.getParameter("trm"));
@@ -165,20 +159,16 @@ public class Teacher_Controller {
             studentList  = studentInterface.studentsByClass(Student_Status.ACTIVE,classes);
         }
         List<ExamsScore> previous = null;
-        if (examsScores.size()==0 && sbaList.size()==0){
-            for (Student student : studentList){
-                examsEntry = new ExamsEntry();
-                examsEntry.setStudentId(student.getStudent_id());
-                examsEntry.setStudentFull_name(student.getStudentFullName());
-                examsEntryList.add(examsEntry);
-            }
-        } else if (examsScores.size() !=0 && sbaList.size() ==0) {
-            for (Student student : studentList){
+        for (Student student : studentList){
+            ExamsEntry examsEntry = new ExamsEntry();
+            examsEntry.setStudentId(student.getStudent_id());
+            examsEntry.setStudentFull_name(student.getStudentFullName());
+            examsEntryList.add(examsEntry);
+        }
+        if (examsScores.size() !=0 && sbaList.size() ==0) {
+            for (ExamsEntry examsEntry : examsEntryList){
                 for (ExamsScore score : examsScores){
-                    if (student.equals(score.getExams_score_id().getStudent_id())){
-                        examsEntry = new ExamsEntry();
-                        examsEntry.setStudentId(student.getStudent_id());
-                        examsEntry.setStudentFull_name(student.getStudentFullName());
+                    if (examsEntry.getStudentId().equals(score.getExams_score_id().getStudent_id().getStudent_id())){
                         examsEntry.setExamsScore(score.getMarks());
                         examsEntry.setGrade(Help.grade(examsEntry.getExamsScore() *
                                 (100-sbaConfig.getClasswork_scale())/100));
@@ -187,38 +177,34 @@ public class Teacher_Controller {
                         examsEntry.setPosition(score.getPosition());
                         examsEntry.setPercent_of_total_exams(score.getMarks() *
                                 (100-sbaConfig.getClasswork_scale())/100);
-                        examsEntryList.add(examsEntry);
                         break;
                     }
                 }
             }
         } else if (examsScores.size() == 0){
-            for (Student student : studentList){
+            for (ExamsEntry entry : examsEntryList){
                 for (SBA sba : sbaList){
-                    if (student.equals(sba.getMarksId().getStudent_id())){
-                        ExamsEntry examsEntry1 = getExamsEntry(student, sba,sbaConfig);
-                        examsEntry1.setTotal_exam_marks(examsEntry1.getTotal_sba());
-                        examsEntryList.add(examsEntry1);
+                    if (entry.getStudentId().equals(sba.getMarksId().getStudent_id().getStudent_id())){
+                        getExamsEntry(sba,sbaConfig,entry);
                         break;
                     }
                 }
             }
         }else {
-            for (Student student : studentList){
+            for (ExamsEntry entry : examsEntryList){
                for(ExamsScore score : examsScores){
                    for (SBA sba : sbaList){
-                       if (student.equals(score.getExams_score_id().getStudent_id())
-                               && student.equals(sba.getMarksId().getStudent_id())
+                       if (entry.getStudentId().equals(score.getExams_score_id().getStudent_id().getStudent_id())
+                               && entry.getStudentId().equals(sba.getMarksId().getStudent_id().getStudent_id())
                        ){
-                           examsEntry = getExamsEntry(student, sba,sbaConfig);
-                           examsEntry.setTotal_exam_marks(examsEntry.getTotal_sba() +(
+                           getExamsEntry(sba,sbaConfig,entry);
+                           entry.setTotal_exam_marks(entry.getTotal_sba() +(
                                    score.getMarks()* (100-sbaConfig.getClasswork_scale())/100));
-                           examsEntry.setGrade(Help.grade(examsEntry.getTotal_exam_marks()));
-                           examsEntry.setPosition(score.getPosition());
-                           examsEntry.setExamsScore(score.getMarks());
-                           examsEntry.setPercent_of_total_exams(score.getMarks() *
+                           entry.setGrade(Help.grade(entry.getTotal_exam_marks()));
+                           entry.setPosition(score.getPosition());
+                           entry.setExamsScore(score.getMarks());
+                           entry.setPercent_of_total_exams(score.getMarks() *
                                    (100-sbaConfig.getClasswork_scale())/100);
-                           examsEntryList.add(examsEntry);
                            break;
                        }
                    }
@@ -255,15 +241,11 @@ public class Teacher_Controller {
             return "exams_entry_page_class_teacher";
         return "exams_entry_page";
     }
-    private ExamsEntry getExamsEntry(Student student, SBA sba ,SBAConfig sbaConfig) {
-        ExamsEntry examsEntry;
+    private void getExamsEntry(SBA sba ,SBAConfig sbaConfig,ExamsEntry examsEntry) {
         Optional<Double> value = sba.getMarks().stream().reduce(Double :: sum);
-        examsEntry = new ExamsEntry();
-        examsEntry.setStudentId(student.getStudent_id());
-        examsEntry.setStudentFull_name(student.getStudentFullName());
         examsEntry.setTotal_sba(value.orElse(0.00) * ((double)sbaConfig.getClasswork_scale()/100));
         examsEntry.setGrade(Help.grade(examsEntry.getTotal_sba()));
-        return examsEntry;
+        examsEntry.setTotal_exam_marks(examsEntry.getTotal_sba());
     }
 
     @RequestMapping(value = "/save_exams_entry")
@@ -296,9 +278,10 @@ public class Teacher_Controller {
         String user_name = authentication.getName();
         Users users = userServiceInterface.getUser(user_name);
         Teacher teacher = teacherInterface.findTeacherByUsers(users);
-        List<Subjects> teacherSubjects = subjectInterface.findSubjectByTeacher(teacher);
+        List<Subjects> teacherSubjects = subjectInterface.findSubjectByTeacher(
+                teacher.getTeacher_id());
         List<Classes> classes = classesInterface.classList();
-        List<Classes> teacherClasses = new ArrayList<>();
+        List<Classes> teacherClasses = classesInterface.teacherClasses(teacher.getTeacher_id());
         Long class_teacher_id = 0L;
         for (Classes classes1 : classes){
             Optional<Teacher> optional = Optional.ofNullable(classes1.getClass_teacher_id());
@@ -307,13 +290,6 @@ public class Teacher_Controller {
             else{
                 if (classes1.getClass_teacher_id().equals(teacher))
                     class_teacher_id = teacher.getTeacher_id();
-            }
-        }
-        for (Classes classes1 : classes){
-            for (Teacher teacher1 : classes1.getClass_teachers()){
-                if (teacher1.equals(teacher)){
-                    teacherClasses.add(classes1);
-                }
             }
         }
         model.addAttribute("classes", teacherClasses);
@@ -335,7 +311,6 @@ public class Teacher_Controller {
 
     @RequestMapping(value = "sba_page")
     public String sba_page(HttpServletRequest servletRequest,Model model){
-        SbaEntry sbaEntry;
         Sba_EntrySet sba_entrySet = new Sba_EntrySet();
         List<SbaEntry> sbaEntries = new ArrayList<>();
         Long term_id = Long.parseLong(servletRequest.getParameter("trm"));
@@ -361,38 +336,33 @@ public class Teacher_Controller {
         }else {
             studentList =  studentInterface.studentsByClass(Student_Status.ACTIVE,classes);
         }
-        if(sbaList.isEmpty()){
-            for (Student student : studentList) {
-                sbaEntry = new SbaEntry();
-                sbaEntry.setFull_name(student.getStudentFullName());
-                sbaEntry.setStudent_id(student.getStudent_id());
-                for (int i = 0; i < sbaConfig.getNumber_of_classwork_columns(); i++) {
-                    class_work[i] = 0.0;
-                }
-                sbaEntry.setClass_work(class_work);
-                sbaEntries.add(sbaEntry);
+        for (Student student : studentList) {
+            SbaEntry sbaEntry = new SbaEntry();
+            sbaEntry.setFull_name(student.getStudentFullName());
+            sbaEntry.setStudent_id(student.getStudent_id());
+            for (int i = 0; i < sbaConfig.getNumber_of_classwork_columns(); i++) {
+                class_work[i] = 0.0;
             }
-
-        }else {
+            sbaEntry.setClass_work(class_work);
+            sbaEntries.add(sbaEntry);
+        }
+        if (! sbaEntries.isEmpty()){
             int index = 0;
             for (SBA sba : sbaList){
-                for (Student student : studentList){
-                    if(sba.getMarksId().getStudent_id().equals(student)){
+                for (SbaEntry entry : sbaEntries){
+                    if(sba.getMarksId().getStudent_id().getStudent_id().equals(entry.getStudent_id())){
                         for (Double marks : sba.getMarks()){
                             class_work[index] = marks;
                             index++;
                         }
                         Optional<Double> totals = sba.getMarks().stream().reduce(Double::sum);
-                        sbaEntry = new SbaEntry();
-                        sbaEntry.setFull_name(student.getStudentFullName());
-                        sbaEntry.setStudent_id(student.getStudent_id());
-                        sbaEntry.setTotal(totals.orElse(0.0));
-                        sbaEntry.setPercent_of_total_sba(sbaEntry.getTotal()*(double)
+                        entry.setTotal(totals.orElse(0.0));
+                        entry.setPercent_of_total_sba(entry.getTotal()*(double)
                         sbaConfig.getClasswork_scale()/100);
-                        sbaEntry.setClass_work(class_work);
-                        sbaEntries.add(sbaEntry);
+                        entry.setClass_work(class_work);
                         class_work = new double[sbaConfig.getNumber_of_classwork_columns()];
                         index = 0;
+                        break;
                     }
                 }
             }
@@ -463,6 +433,7 @@ public class Teacher_Controller {
         Academic_Year year = academicYearInterface.findAcademicYearByMaxId(Status.CURRENT);
         SubjectReportSummary summary ;
         List<SubjectReportSummary> summaryList = new ArrayList<>();
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
         Report report = null;
         SBAConfig sbaConfig = sbaConfigInterface.findSBAConfig(classes.getParentClass().getClass_department(), year,Status.CURRENT);
         if (sbaConfig == null){
@@ -503,7 +474,7 @@ public class Teacher_Controller {
             for (Report report1 : reportList){
                 if (score.getExams_score_id().getStudent_id().equals(report1.getStudent())){
                     for (SubjectReportSummary summary1 : report1.getSummaryList()){
-                        if(summary1.getSubject_name().equals(score.getExams_score_id().getSubject_id().getSubject_name())){
+                        if(summary1.getSubject_name().equals(score.getExams_score_id().getSubject_id().shotSubjectName())){
                             exa_marks = score.getMarks() * (100 - scale)/100.0;
                             summary1.setExams_score(exa_marks);
                             summary1.setTotal(exa_marks);
@@ -518,7 +489,7 @@ public class Teacher_Controller {
             for (Report report1 : reportList){
                 if(sba.getMarksId().getStudent_id().equals(report1.getStudent())){
                     for (SubjectReportSummary summary1 : report1.getSummaryList()){
-                        if (summary1.getSubject_name().equals(sba.getMarksId().getSubject_id().getSubject_name())){
+                        if (summary1.getSubject_name().equals(sba.getMarksId().getSubject_id().shotSubjectName())){
                             Optional<Double> totals = sba.getMarks().stream().reduce(Double::sum);
                             cls_work = totals.orElse(0.0) * (scale/100.0);
                             summary1.setClass_score(cls_work);
@@ -528,7 +499,8 @@ public class Teacher_Controller {
                             report1.setTotal_score(report1.getTotal_score() + summary1.getTotal());
                         }
                     }
-                    report1.setAverage_score(report1.getTotal_score()/(100.0*subjects.size()));
+                    report1.setAverage_score(Double.parseDouble(decimalFormat.format(report1.getTotal_score()/
+                            report1.getSummaryList().size())));
                     break;
                 }
             }
@@ -556,7 +528,8 @@ public class Teacher_Controller {
 
     @RequestMapping(value = "/next")
     public String next(Model model,@RequestParam("trm") Long term_id,
-                       @RequestParam("cls")String class_id,@RequestParam("index") Integer index) throws AppExceptions{
+                       @RequestParam("cls")String class_id,@RequestParam("index") Integer index)
+            throws AppExceptions{
         Classes classes = classesInterface.findClassById(class_id);
         Term term = termInterface.findTermById(term_id);
         Report report;
@@ -590,7 +563,8 @@ public class Teacher_Controller {
 
     @RequestMapping(value = "/prev")
     public String prev(Model model,@RequestParam("trm") Long term_id,
-                       @RequestParam("cls")String class_id,@RequestParam("index") Integer index) throws AppExceptions{
+                       @RequestParam("cls")String class_id,@RequestParam("index") Integer index)
+            throws AppExceptions{
         Classes classes = classesInterface.findClassById(class_id);
         Term term = termInterface.findTermById(term_id);
         Report report;
@@ -622,10 +596,12 @@ public class Teacher_Controller {
     }
     @RequestMapping(value = "/report_filling")
     public String reportFilling(@RequestParam("cls") String class_id,
-                                @RequestParam("trm") Long term_id,Model model) throws AppExceptions{
+                                @RequestParam("trm") Long term_id,Model model)
+            throws AppExceptions{
         reportFillingList.clear();
         Classes classes = classesInterface.findClassById(class_id);
         Term term = termInterface.findTermById(term_id);
+        DecimalFormat df = new DecimalFormat("0.00");
         List<ExamsScore> previousScores = new ArrayList<>();
         if (term.getTerm_id() == 1L)
             previousScores = examsScoreInterface.findExamsScoreByClassAndTerm(classes,
@@ -687,7 +663,7 @@ public class Teacher_Controller {
             for (Report report1 : reportFillingList){
                 if (score.getExams_score_id().getStudent_id().equals(report1.getStudent())){
                     for (SubjectReportSummary summary1 : report1.getSummaryList()){
-                        if(summary1.getSubject_name().equals(score.getExams_score_id().getSubject_id().getSubject_name())){
+                        if(summary1.getSubject_name().equals(score.getExams_score_id().getSubject_id().shotSubjectName())){
                             exa_marks = score.getMarks() * (100 - scale)/100.0;
                             summary1.setExams_score(exa_marks);
                             summary1.setTotal(exa_marks);
@@ -702,7 +678,7 @@ public class Teacher_Controller {
             for (Report report1 : reportFillingList){
                 if(sba.getMarksId().getStudent_id().equals(report1.getStudent())){
                     for (SubjectReportSummary summary1 : report1.getSummaryList()){
-                        if (summary1.getSubject_name().equals(sba.getMarksId().getSubject_id().getSubject_name())){
+                        if (summary1.getSubject_name().equals(sba.getMarksId().getSubject_id().shotSubjectName())){
                             Optional<Double> totals = sba.getMarks().stream().reduce(Double::sum);
                             cls_work = totals.orElse(0.0) * (scale/100.0);
                             summary1.setClass_score(cls_work);
@@ -712,7 +688,8 @@ public class Teacher_Controller {
                             report1.setTotal_score(report1.getTotal_score() + summary1.getTotal());
                         }
                     }
-                    report1.setAverage_score(report1.getTotal_score()/(100.0*subjects.size()));
+                    report1.setAverage_score(Double.parseDouble(df.format(report1.getTotal_score()/
+                            report1.getSummaryList().size())));
                     break;
                 }
             }
@@ -740,14 +717,16 @@ public class Teacher_Controller {
     public String saveReportDetails(@ModelAttribute("reportDetails") Report details,
                                     @RequestParam("stu") String student_id,@RequestParam("trm")
                                     Long term_id,@RequestParam("cls") String class_id,
-                                    @RequestParam("idx") Integer index,@RequestParam("pos_in_class") String pos_in_class
-                                    ,@ModelAttribute("commonDetails") CommonReportDetails commonDetails){
+                                    @RequestParam("attend") int attend,
+                                    @RequestParam("idx")Integer index,
+                                    @RequestParam("pos_in_class") String pos_in_class,
+                                    @ModelAttribute("commonDetails")
+                                        CommonReportDetails commonDetails){
         Student student = studentInterface.findStudentById(student_id);
         Classes classes = classesInterface.findClassById(class_id);
         Term term = termInterface.findTermById(term_id);
         ReportDetailsId id = new ReportDetailsId(student,classes,term);
         details.getReportDetails().setReportDetailsId(id);
-        details.setPosition_in_class(pos_in_class);
         Academic_Year year = academicYearInterface.findAcademicYearByMaxId(Status.CURRENT);
         details.getReportDetails().setAcademic_year(year);
         CommonReportDetails common;
@@ -759,12 +738,16 @@ public class Teacher_Controller {
         Help.saveRemark(details.getReportDetails().getTeacher_remark(),remarksInterface);
         Help.saveInterest(details.getReportDetails().getInterest(),interestInterface);
         Help.saveConduct(details.getReportDetails().getAttitude(),conductInterface);
+        details.getReportDetails().setAttendance(attend);
+        details.getReportDetails().setPosition_in_class(pos_in_class);
+        reportDetailInterface.saveDetails(details.getReportDetails());
         return "redirect:/next_report_filling?cls="+classes.getClass_id()+"&trm="+term.getTerm_id()+"&index="+index;
     }
 
     @RequestMapping(value = "/next_report_filling")
     public String nextReportFilling(@RequestParam("cls") String class_id,@RequestParam("trm")
-                                    Long term_id, @RequestParam("index") Integer index,Model model){
+                                    Long term_id, @RequestParam("index") Integer index,
+                                    Model model){
         Report report;
         Classes classes = classesInterface.findClassById(class_id);
         if (index > reportFillingList.size()-1){
@@ -777,9 +760,11 @@ public class Teacher_Controller {
     }
 
     @RequestMapping(value = "/passed_record")
-    public String passedRecord(@RequestParam("student_id") String student_id,Model model) throws AppExceptions {
+    public String passedRecord(@RequestParam("student_id") String student_id,Model model)
+            throws AppExceptions {
         passReportList.clear();
         detailsList.clear();
+        DecimalFormat df = new DecimalFormat("0.00");
         Student student = studentInterface.findStudentById(student_id);
         List<ExamsScore> scoreFromExams = examsScoreInterface.examsScoreByStudentIdFromExams(student,
                 student.getClasses().getParentClass().getClass_department());
@@ -852,8 +837,8 @@ public class Teacher_Controller {
                     reportDetail = reportDetails;
                 }
             }
-            passReportList.add(new Report(student,student.getStudentFullName(),total,0,(total/size),
-                    reportDetail,"",entry.getValue()));
+            passReportList.add(new Report(student,student.getStudentFullName(),total,0,Double.parseDouble(
+                    df.format(total/size)), reportDetail,"",entry.getValue()));
         }
         Help.aggregateScore(passReportList,subjectInterface);
         setModelForPassRecord(detailsList.get(0),model,passReportList.get(0),sbaConfig,1);
@@ -872,7 +857,8 @@ public class Teacher_Controller {
 
 
     @RequestMapping(value = "/next_pass_report")
-    public String next_pass_report(@RequestParam("index") Integer index,Model model) throws AppExceptions{
+    public String next_pass_report(@RequestParam("index") Integer index,Model model)
+            throws AppExceptions{
         Report report;
         if (index > passReportList.size()-1){
             String message = "END OF STUDENT RECORD";
@@ -952,7 +938,8 @@ public class Teacher_Controller {
     // exception on method note!!!!
 
     @RequestMapping(value = "/search_progress_report")
-    public String searchProgressReport(HttpServletRequest servletRequest,Model model) throws AppExceptions{
+    public String searchProgressReport(HttpServletRequest servletRequest,Model model)
+            throws AppExceptions{
         Term term = termInterface.findTermById(Long.parseLong(servletRequest.getParameter("trm")));
         Classes classes = classesInterface.findClassById(servletRequest.getParameter("cls"));
         Student student = studentInterface.findStudentById(servletRequest.getParameter("stuId"));
@@ -979,7 +966,8 @@ public class Teacher_Controller {
     // exception on method note!!!!
 
     @RequestMapping(value = "/search_filling_report")
-    public String searchFillingReport(HttpServletRequest servletRequest,Model model) throws AppExceptions{
+    public String searchFillingReport(HttpServletRequest servletRequest,Model model)
+            throws AppExceptions{
         Term term = termInterface.findTermById(Long.parseLong(servletRequest.getParameter("trm")));
         Classes classes = classesInterface.findClassById(servletRequest.getParameter("cls"));
         Student student = studentInterface.findStudentById(servletRequest.getParameter("stuId"));
@@ -1003,18 +991,22 @@ public class Teacher_Controller {
 
     // fetch data by grouping it by term and class;
     @RequestMapping(value = "/summary_report")
-    public String summaryReport(@RequestParam("student_id") String studentId,Model model) throws AppExceptions{
+    public String summaryReport(@RequestParam("student_id") String studentId,Model model)
+            throws AppExceptions{
         Student student = studentInterface.findStudentById(studentId);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String user_name = authentication.getName();
         Users users = userServiceInterface.getUser(user_name);
         Teacher teacher = teacherInterface.findTeacherByUsers(users);
-        List<Subjects> teacherSubjects = subjectInterface.findSubjectByTeacher(teacher);
+        List<Subjects> teacherSubjects = subjectInterface.findSubjectByTeacher(
+                teacher.getTeacher_id());
         List<ExamsScore> examsScores = new ArrayList<>();
         List<ExamsScore> recordScores = new ArrayList<>();
         teacherSubjects.forEach(subjects -> {
-            examsScores.addAll(examsScoreInterface.examsScoreByStudentAndSubject(student, subjects));
-            recordScores.addAll(examsScoreInterface.examsScoreByStudentAndSubjectFromRecordExams(student, subjects));
+            examsScores.addAll(examsScoreInterface.examsScoreByStudentAndSubject(student,
+                    subjects));
+            recordScores.addAll(examsScoreInterface.examsScoreByStudentAndSubjectFromRecordExams(
+                    student, subjects));
         });
         Map<Subjects, Map<Classes,List<TermRecords>>> map = new HashMap<>();
         if (examsScores.size() == 0 && recordScores.size() ==0){
@@ -1030,9 +1022,12 @@ public class Teacher_Controller {
                 listMap.put(examsScore.getExams_score_id().getClass_id(), termRecords);
                 map.put(examsScore.getExams_score_id().getSubject_id(), listMap);
             }else {
-                Map<Classes,List<TermRecords>> listMap = map.get(examsScore.getExams_score_id().getSubject_id());
-                List<TermRecords> termRecords = listMap.get(examsScore.getExams_score_id().getClass_id());
-                termRecords.add(new TermRecords(examsScore.getExams_score_id().getTerm_id().getTerm_name(),
+                Map<Classes,List<TermRecords>> listMap = map.get(
+                        examsScore.getExams_score_id().getSubject_id());
+                List<TermRecords> termRecords = listMap.get(
+                        examsScore.getExams_score_id().getClass_id());
+                termRecords.add(new TermRecords(
+                        examsScore.getExams_score_id().getTerm_id().getTerm_name(),
                         examsScore.getMarks()));
                 listMap.put(examsScore.getExams_score_id().getClass_id(), termRecords);
                 map.put(examsScore.getExams_score_id().getSubject_id(), listMap);
@@ -1041,15 +1036,19 @@ public class Teacher_Controller {
         recordScores.forEach(record ->{
             if (!map.containsKey(record.getExams_score_id().getSubject_id())){
                 List<TermRecords> termRecords = new ArrayList<>();
-                termRecords.add(new TermRecords(record.getExams_score_id().getTerm_id().getTerm_name(),
+                termRecords.add(new TermRecords(
+                        record.getExams_score_id().getTerm_id().getTerm_name(),
                         record.getMarks()));
                 Map<Classes,List<TermRecords>> listMap = new HashMap<>();
                 listMap.put(record.getExams_score_id().getClass_id(), termRecords);
                 map.put(record.getExams_score_id().getSubject_id(), listMap);
             }else {
-                Map<Classes,List<TermRecords>> listMap = map.get(record.getExams_score_id().getSubject_id());
-                List<TermRecords> termRecords = listMap.get(record.getExams_score_id().getClass_id());
-                termRecords.add(new TermRecords(record.getExams_score_id().getTerm_id().getTerm_name(),
+                Map<Classes,List<TermRecords>> listMap = map.get(
+                        record.getExams_score_id().getSubject_id());
+                List<TermRecords> termRecords = listMap.get(
+                        record.getExams_score_id().getClass_id());
+                termRecords.add(new TermRecords(
+                        record.getExams_score_id().getTerm_id().getTerm_name(),
                         record.getMarks()));
                 listMap.put(record.getExams_score_id().getClass_id(), termRecords);
                 map.put(record.getExams_score_id().getSubject_id(), listMap);
